@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bot
-  name="*team name*_Nymphora"
+  name="asdfasdf_Nymphora"
   description="*team name* Nymphora"
   heroname="Hero_Fairy"
   rootlua="../heroes/nymphora_main.lua"

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bot
-  name="*team name*_Devourer"
-  description="*team name* Devourer"
+  name="RETK_Devourer"
+  description="RETK Devourer"
   heroname="Hero_Devourer"
   rootlua="../heroes/devourer_main.lua"
-  defaultplayername="*team name*DevourerBot"
+  defaultplayername="RETK_DevourerBot"
   precachepath="/heroes/devourer/"
 />

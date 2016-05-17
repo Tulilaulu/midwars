@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bot
-  name="*team name*_Valkyrie"
-  description="*team name* Valkyrie"
+  name="RETK_Valkyrie"
+  description="RETK Valkyrie"
   heroname="Hero_Valkyrie"
   rootlua="../heroes/valkyrie_main.lua"
-  defaultplayername="*team name*ValkyrieBot"
+  defaultplayername="RETK_ValkyrieBot"
   precachepath="/heroes/valkyrie/"
 />

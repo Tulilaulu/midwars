@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bot
-  name="*team name*_MonkeyKing"
-  description="*team name* Monkey King"
+  name="RETK_MonkeyKing"
+  description="RETK Monkey King"
   heroname="Hero_MonkeyKing"
   rootlua="../heroes/monkeyking_main.lua"
-  defaultplayername="*team name*MonkeyKingBot"
+  defaultplayername="RETK_MonkeyKingBot"
   precachepath="/heroes/monkey_king/"
 />

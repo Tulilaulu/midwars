@@ -28,7 +28,7 @@ object.metadata = {}
 object.behaviorLib = {}
 object.skills = {}
 
-runfile "bots/core.lua"
+runfile "bots/teams/team_name_here/core.lua"
 runfile "bots/teams/team_name_here/botbraincore.lua"
 runfile "bots/eventsLib.lua"
 runfile "bots/metadata.lua"

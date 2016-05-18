@@ -233,7 +233,7 @@ object.onthink = object.onthinkOverride
 function object:oncombateventOverride(EventData)
     self:oncombateventOld(EventData)
     local addBonus = 0
-    --p(EventData)
+    p(EventData)
 
     -- Valk arrow thrown by an ally hit an enemy
     if EventData.InflictorName == "Projectile_Valkyrie_Ability2" and EventData.SourcePlayerName == "RETK_ValkyrieBot" then

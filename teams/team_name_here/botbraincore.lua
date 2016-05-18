@@ -247,7 +247,8 @@ function object:onthink(tGameVariables)
 			if self.bReportBehavior == true then
 				if self.nCurrentBehavior >= 1 then
 					local sName = core.GetCurrentBehaviorName(self)
-					BotEcho("CurBehavior: " .. sName .. ", selected from " .. msg)
+					local utility = self.tEvaluatedBehaviors[1].Utility
+					BotEcho("CurBehavior: " .. sName .. "[" .. tostring(utility) .. "], selected from " .. msg)
 				else
 					BotEcho("CurBehavior: no evaluated behaviors!")
 				end

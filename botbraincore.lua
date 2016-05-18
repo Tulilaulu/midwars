@@ -237,7 +237,7 @@ function object:onthink(tGameVariables)
 			behaviorLib.nNextBehaviorTime = behaviorLib.nNextBehaviorTime + behaviorLib.nBehaviorAssessInterval
 		
 			self.tEvaluatedBehaviors = {}
-			core.AssessBehaviors(self.tEvaluatedBehaviors)
+			local msg = core.AssessBehaviors(self.tEvaluatedBehaviors)
 		
 			self.nCurrentBehavior = nil
 			if #self.tEvaluatedBehaviors > 0 then
@@ -247,7 +247,7 @@ function object:onthink(tGameVariables)
 			if self.bReportBehavior == true then
 				if self.nCurrentBehavior >= 1 then
 					local sName = core.GetCurrentBehaviorName(self)
-					BotEcho("CurBehavior: "..sName) 
+					BotEcho("CurBehavior: " .. sName .. ", selected from " .. msg)
 				else
 					BotEcho("CurBehavior: no evaluated behaviors!")
 				end
@@ -527,11 +527,13 @@ function core.AssessBehaviors(tOutputBehaviors)
 	end
 	
 	local nNumEvaluatedBehaviors = 0
+	local msgs = {}
 	
 	for i, curBehavior in ipairs(behaviorLib.tBehaviors) do
 		if curBehavior["Utility"] ~= nil and curBehavior["Execute"] ~= nil then
 			StartProfile(curBehavior["Name"] .. " - Utility")
 			local nUtil = curBehavior["Utility"](object)
+			msgs[i] = curBehavior["Name"] .. ": " .. tostring(nUtil)
 			nNumEvaluatedBehaviors = nNumEvaluatedBehaviors + 1
 			tOutputBehaviors[nNumEvaluatedBehaviors] = {Utility = nUtil, Behavior = curBehavior}
 			StopProfile()
@@ -545,6 +547,7 @@ function core.AssessBehaviors(tOutputBehaviors)
 	end
 	
 	table.sort(tOutputBehaviors, BehaviorOrder)
+	return table.concat(msgs, " ")
 end
 
 function core.ReassessBehaviors()

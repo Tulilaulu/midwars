@@ -3560,7 +3560,8 @@ Current algorithm:
 	local tInventory = core.unitSelf:GetInventory(true)
 	local nextItemDef = behaviorLib.DetermineNextItemDef(botBrain)
 	local bMyTeamHasHuman = core.MyTeamHasHuman()
-	local bBuyTPStone = (core.nDifficulty ~= core.nEASY_DIFFICULTY) or bMyTeamHasHuman
+	-- local bBuyTPStone = (core.nDifficulty ~= core.nEASY_DIFFICULTY) or bMyTeamHasHuman
+	local bBuyTPStone = false
 
 	--For our first frame of this execute
 	if bBuyTPStone and core.GetLastBehaviorName(botBrain) ~= core.GetCurrentBehaviorName(botBrain) then

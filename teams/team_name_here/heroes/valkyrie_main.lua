@@ -200,7 +200,7 @@ local function PreGameExecuteOverride(botBrain)
         return object.preGameExecuteOld(botBrain)
     end
 
-    if !skills.javelin:CanActivate() then
+    if not skills.javelin:CanActivate() then
         p("Skill is null :(")
         return object.preGameExecuteOld(botBrain)
     end

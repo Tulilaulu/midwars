@@ -14,7 +14,7 @@ object.bAttackCommands = true
 object.bAbilityCommands = true
 object.bOtherCommands = true
 
-object.bReportBehavior = false
+object.bReportBehavior = true
 object.bDebugUtility = false
 object.bDebugExecute = false
 
@@ -75,14 +75,14 @@ function object:SkillBuild()
 
   if not bSkillsValid then
     skills.call = unitSelf:GetAbility(0)
-    skills.javelin = unitSelf:GetAbility(1)
+    skills.arrow = unitSelf:GetAbility(1)
     skills.leap = unitSelf:GetAbility(2)
     skills.ulti = unitSelf:GetAbility(3)
     skills.attributeBoost = unitSelf:GetAbility(4)
     skills.taunt = unitSelf:GetAbility(8)
     skills.courier = unitSelf:GetAbility(12)
 
-    if skills.call and skills.javelin and skills.leap and skills.ulti and skills.attributeBoost and skills.taunt and skills.courier then
+    if skills.call and skills.arrow and skills.leap and skills.ulti and skills.attributeBoost and skills.taunt and skills.courier then
       bSkillsValid = true
     else
       return
@@ -93,17 +93,61 @@ function object:SkillBuild()
     return
   end
 
-  if skills.ulti:CanLevelUp() then
-    skills.ulti:LevelUp()
-  elseif skills.javelin:CanLevelUp() then
-    skills.javelin:LevelUp()
-  elseif skills.leap:CanLevelUp() then
+  if skills.leap:GetLevel() == 0 and skills.arrow:GetLevel() == 1 and skills.call:GetLevel() == 1 then
     skills.leap:LevelUp()
+  elseif skills.ulti:CanLevelUp() then
+    skills.ulti:LevelUp()
+  elseif skills.arrow:CanLevelUp() then
+    skills.arrow:LevelUp()
   elseif skills.call:CanLevelUp() then
     skills.call:LevelUp()
+  elseif skills.leap:CanLevelUp() then
+    skills.leap:LevelUp()
   else
     skills.attributeBoost:LevelUp()
   end
+end
+
+-- utility agression points if a skill/item is available for use
+object.nArrowUp = 15
+object.nCallUp = 17
+
+-- utility agression points that are applied to the bot upon successfully using a skill/item
+object.nCallUse = 24
+object.nArrowUse = 14
+
+--thresholds of aggression the bot must reach to use these abilities
+object.nArrowThreshold = 30
+object.nCallThreshold = 23
+
+local function creepsInWay(unitTarget, drawLines)
+    local selfPos = core.unitSelf:GetPosition()
+    local targetPos = unitTarget:GetPosition()
+    local diff = Vector3.Distance(targetPos, selfPos)
+
+    if drawLines then drawLine(selfPos, targetPos, "red") end
+
+    local ok = true
+    for i, creep in pairs(core.localUnits["EnemyCreeps"]) do
+        local creepPos = creep:GetPosition()
+        local d = Vector3.Length(Vector3.Cross(creepPos - selfPos, creepPos - targetPos)) / diff
+        local color
+        -- p(d)
+        if d > 90 then
+            color = "green"
+        else
+            color ="red"
+            ok = false
+        end
+        if drawLines then drawCross(creep:GetPosition(), color) end
+    end
+
+    if ok then
+        if drawLines then drawCross(targetPos, "green") end
+    else
+        if drawLines then drawCross(targetPos, "red") end
+    end
+    return not ok
 end
 
 ------------------------------------------------------
@@ -114,6 +158,11 @@ end
 -- @return: none
 function object:onthinkOverride(tGameVariables)
   self:onthinkOld(tGameVariables)
+
+  local unitTarget = behaviorLib.heroTarget
+  if unitTarget and unitTarget:IsValid() then
+    creepsInWay(unitTarget, true)
+  end
 
   -- custom code here
 end
@@ -144,53 +193,91 @@ object.oncombatevent = object.oncombateventOverride
 ------------------------
 --CustomHarassUtility
 ------------------------
+
+
 local function CustomHarassUtilityFnOverride(hero)
-    local abilTaunt = skills.taunt
-    if abilTaunt:CanActivate() then
-        return 100
+    local unitTarget = behaviorLib.heroTarget
+    if not unitTarget or not unitTarget:IsValid() or not bSkillsValid then
+        return 0 --can not execute, move on to the next behavior
     end
 
-    return 0 -- The default
+    -- local abilTaunt = skills.taunt
+    -- if abilTaunt:CanActivate() then
+    --     return 100
+    -- end
+
+    local utility = 0
+    if (not creepsInWay(unitTarget, false)) and skills.arrow:CanActivate() then
+        utility = utility + object.nArrowUp
+    end
+    if skills.call:CanActivate() then
+        utility = utility + object.nCallUp
+    end
+
+    return utility
 end
 behaviorLib.CustomHarassUtility = CustomHarassUtilityFnOverride
 
 local function HarassHeroExecuteOverride(botBrain)
-	local unitTarget = behaviorLib.heroTarget
-	if not unitTarget or not unitTarget:IsValid() then
-		return false --can not execute, move on to the next behavior
-	end
+    local unitTarget = behaviorLib.heroTarget
+    if not unitTarget or not unitTarget:IsValid() or not bSkillsValid then
+        return false --can not execute, move on to the next behavior
+    end
 
-	local unitSelf = core.unitSelf
+    local unitSelf = core.unitSelf
 
-	local vecMyPosition = unitSelf:GetPosition()
-	local nAttackRangeSq = core.GetAbsoluteAttackRangeToUnit(unitSelf, unitTarget)
-	nAttackRangeSq = nAttackRangeSq * nAttackRangeSq
+    local vecMyPosition = unitSelf:GetPosition()
+    local nAttackRangeSq = core.GetAbsoluteAttackRangeToUnit(unitSelf, unitTarget)
+    nAttackRangeSq = nAttackRangeSq * nAttackRangeSq
 
-	local vecTargetPosition = unitTarget:GetPosition()
-	local nTargetDistanceSq = Vector3.Distance2DSq(vecMyPosition, vecTargetPosition)
-	local bTargetRooted = unitTarget:IsStunned() or unitTarget:IsImmobilized() or unitTarget:GetMoveSpeed() < 200
-	local bCanSeeUnit = core.CanSeeUnit(botBrain, unitTarget)
+    local vecTargetPosition = unitTarget:GetPosition()
+    local nTargetDistanceSq = Vector3.Distance2DSq(vecMyPosition, vecTargetPosition)
+    local bTargetRooted = unitTarget:IsStunned() or unitTarget:IsImmobilized() or unitTarget:GetMoveSpeed() < 200
+    local bCanSeeUnit = core.CanSeeUnit(botBrain, unitTarget)
 
-	local nLastHarassUtility = behaviorLib.lastHarassUtil
+    local nLastHarassUtility = behaviorLib.lastHarassUtil
 
-	local bActionTaken = false
+    local bActionTaken = false
 
-	local nNow = HoN.GetGameTime()
-	
-	--Taunting!!!
-	if not bActionTaken and bCanSeeUnit then		
-		local abilTaunt = skills.taunt
-		if abilTaunt:CanActivate() then
-			local nRange = 1200
-			if nTargetDistanceSq < (nRange * nRange) then
-				bActionTaken = core.OrderAbilityEntity(botBrain, abilTaunt, unitTarget)
-			end
-		end
-	end
+    local nNow = HoN.GetGameTime()
+    local abilTaunt = skills.taunt
+    local abilArrow = skills.arrow
+    local abilCall = skills.call
 
-	if not bActionTaken then
-		return object.harassExecuteOld(botBrain)
-	end
+    --Taunt
+    if not bActionTaken and bCanSeeUnit then        
+        if abilTaunt:CanActivate() then
+            local nRange = 1200
+            if nTargetDistanceSq < (nRange * nRange) then
+                bActionTaken = core.OrderAbilityEntity(botBrain, abilTaunt, unitTarget)
+            end
+        end
+    end
+
+    --Arrow
+    if not bActionTaken and not creepsInWay(unitTarget, false) and abilArrow:CanActivate() then
+        local nRange = abilArrow:GetRange()
+        if nTargetDistanceSq < (nRange * nRange) then
+            if nLastHarassUtility > object.nArrowThreshold then
+                bActionTaken = core.OrderAbilityPosition(botBrain, abilArrow, unitTarget:GetPosition())
+            end
+        end
+    end
+
+    --Call of the Valkyrie
+    if not bActionTaken and abilCall:CanActivate() then
+        local nRange = abilCall:GetRange()
+        if nTargetDistanceSq < (nRange * nRange) then
+            if nLastHarassUtility > object.nCallThreshold then
+                bActionTaken = core.OrderAbility(botBrain, abilCall)
+            end
+        end
+    end
+
+
+    if not bActionTaken then
+        return object.harassExecuteOld(botBrain)
+    end
 
 end
 object.harassExecuteOld = behaviorLib.HarassHeroBehavior["Execute"]
@@ -201,12 +288,12 @@ local function PreGameExecuteOverride(botBrain)
         return object.preGameExecuteOld(botBrain)
     end
 
-    if skills.javelin == nil then
+    if skills.arrow == nil then
         p("Skill is null :(")
         return object.preGameExecuteOld(botBrain)
     end
 
-    if not skills.javelin:CanActivate() then
+    if not skills.arrow:CanActivate() then
         p("Skill is null :(")
         return object.preGameExecuteOld(botBrain)
     end
@@ -220,7 +307,7 @@ local function PreGameExecuteOverride(botBrain)
         enemyPool = Vector3.Create(8588.3457, 11719.2256, 259.2413)
     end
 
-    if core.OrderAbilityPosition(botBrain, skills.javelin, enemyPool) then
+    if core.OrderAbilityPosition(botBrain, skills.arrow, enemyPool) then
         p("Arrow thrown!")
         object.arrowThrown = true
     end

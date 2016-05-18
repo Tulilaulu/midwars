@@ -404,7 +404,7 @@ behaviorLib.PreGameBehavior["Execute"] = PreGameExecuteOverride
 
 local function DefensiveUltiUtility(botBrain)
     local hpPercent = core.unitSelf:GetHealthPercent()
-    if skills.ulti:CanActivate() and hpPercent < 0.15 then
+    if skills.ulti:CanActivate() and hpPercent < 0.25 then
         return 95
     end
     return 0

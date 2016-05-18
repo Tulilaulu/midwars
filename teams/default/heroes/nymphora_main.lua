@@ -33,8 +33,9 @@ runfile "bots/botbraincore.lua"
 runfile "bots/eventsLib.lua"
 runfile "bots/metadata.lua"
 runfile "bots/behaviorLib.lua"
+runfile "bots/teams/default/generics.lua"
 
-local core, eventsLib, behaviorLib, metadata, skills = object.core, object.eventsLib, object.behaviorLib, object.metadata, object.skills
+local core, eventsLib, behaviorLib, metadata, skills, generics = object.core, object.eventsLib, object.behaviorLib, object.metadata, object.skills, object.generics
 
 local print, ipairs, pairs, string, table, next, type, tinsert, tremove, tsort, format, tostring, tonumber, strfind, strsub
   = _G.print, _G.ipairs, _G.pairs, _G.string, _G.table, _G.next, _G.type, _G.table.insert, _G.table.remove, _G.table.sort, _G.string.format, _G.tostring, _G.tonumber, _G.string.find, _G.string.sub
@@ -47,6 +48,13 @@ local Clamp = core.Clamp
 BotEcho('loading nymphora_main...')
 
 object.heroName = 'Hero_Fairy'
+
+
+behaviorLib.StartingItems = {"Item_ManaBattery", "Item_MinorTotem", "Item_GuardianRing", "Item_CrushingClaws"}
+behaviorLib.LaneItems = {"Item_ManaRegen3", "Item_Marchers", "Item_EnhancedMarchers", "Item_MysticVestments"}
+behaviorLib.MidItems = {"Item_Astrolabe", "Item_MagicArmor2"}
+behaviorLib.LateItems = {"Item_BehemothsHeart"}
+
 
 --------------------------------
 -- Lanes
@@ -78,14 +86,14 @@ function object:SkillBuild()
     return
   end
 
-  if skills.ulti:CanLevelUp() then
-    skills.ulti:LevelUp()
-  elseif skills.heal:CanLevelUp() then
-    skills.heal:LevelUp()
+  if skills.stun:CanLevelUp() then
+    skills.stun:LevelUp()
   elseif skills.mana:CanLevelUp() then
     skills.mana:LevelUp()
-  elseif skills.stun:CanLevelUp() then
-    skills.stun:LevelUp()
+  elseif skills.heal:CanLevelUp() then
+    skills.heal:LevelUp()
+  elseif skills.ulti:CanLevelUp() then
+    skills.ulti:LevelUp()
   else
     skills.attributeBoost:LevelUp()
   end
@@ -100,7 +108,6 @@ end
 function object:onthinkOverride(tGameVariables)
   self:onthinkOld(tGameVariables)
 
-  -- custom code here
 end
 object.onthinkOld = object.onthink
 object.onthink = object.onthinkOverride
@@ -119,5 +126,64 @@ end
 -- override combat event trigger function.
 object.oncombateventOld = object.oncombatevent
 object.oncombatevent = object.oncombateventOverride
+
+local function HarassHeroExecuteOverride(botBrain)
+  local unitTarget = behaviorLib.heroTarget
+  if unitTarget == nil or not unitTarget:IsValid() then
+    return false --can not execute, move on to the next behavior
+  end
+
+  local unitSelf = core.unitSelf
+  local nTargetDistanceSq = Vector3.Distance2DSq(unitSelf:GetPosition(), unitTarget:GetPosition())
+
+  local bActionTaken = false
+
+  if core.CanSeeUnit(botBrain, unitTarget) then
+    local stun = skills.stun
+    if stun:CanActivate() and core.unitSelf:GetMana() > 50 then
+      local nRange = stun:GetRange()
+      if nTargetDistanceSq < (nRange * nRange) then
+        bActionTaken = core.OrderAbilityPosition(botBrain, stun, unitTarget:GetPosition())
+      else
+        bActionTaken = core.OrderMoveToUnitClamp(botBrain, unitSelf, unitTarget)
+      end
+    end
+  end
+
+  if not bActionTaken then
+    return core.harassExecuteOld(botBrain)
+  end
+end
+core.harassExecuteOld = behaviorLib.HarassHeroBehavior["Execute"]
+behaviorLib.HarassHeroBehavior["Execute"] = HarassHeroExecuteOverride
+
+local function CustomHarassUtilityFnOverride(target)
+  local nUtility = 0
+
+  return generics.CustomHarassUtility(target) + nUtility
+end
+behaviorLib.CustomHarassUtility = CustomHarassUtilityFnOverride
+
+
+local function ManaUtility(botBrain)
+  local mana = skills.mana
+  if mana:CanActivate() and core.unitSelf:GetManaPercent() < 1 then
+     return 50
+  end
+  return 0
+end
+
+local function ManaExecute(botBrain)
+  local mana = skills.mana
+  if mana and mana:CanActivate() then
+    return core.OrderAbilityEntity(botBrain, mana, core.unitSelf)
+  end
+  return false
+end
+local ManaBehavior = {}
+ManaBehavior["Utility"] = ManaUtility
+ManaBehavior["Execute"] = ManaExecute
+ManaBehavior["Name"] = "Mana"
+tinsert(behaviorLib.tBehaviors, ManaBehavior)
 
 BotEcho('finished loading nymphora_main')

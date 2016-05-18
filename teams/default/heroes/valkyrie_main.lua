@@ -33,8 +33,10 @@ runfile "bots/botbraincore.lua"
 runfile "bots/eventsLib.lua"
 runfile "bots/metadata.lua"
 runfile "bots/behaviorLib.lua"
+runfile "bots/teams/default/generics.lua"
 
-local core, eventsLib, behaviorLib, metadata, skills = object.core, object.eventsLib, object.behaviorLib, object.metadata, object.skills
+
+local core, eventsLib, behaviorLib, metadata, skills, generics = object.core, object.eventsLib, object.behaviorLib, object.metadata, object.skills, object.generics
 
 local print, ipairs, pairs, string, table, next, type, tinsert, tremove, tsort, format, tostring, tonumber, strfind, strsub
   = _G.print, _G.ipairs, _G.pairs, _G.string, _G.table, _G.next, _G.type, _G.table.insert, _G.table.remove, _G.table.sort, _G.string.format, _G.tostring, _G.tonumber, _G.string.find, _G.string.sub
@@ -47,6 +49,13 @@ local Clamp = core.Clamp
 BotEcho('loading valkyrie_main...')
 
 object.heroName = 'Hero_Valkyrie'
+
+
+behaviorLib.StartingItems = {"Item_ManaBattery", "2 Item_MinorTotem", "Item_HealthPotion", "Item_RunesOfTheBlight"}
+behaviorLib.LaneItems = {"Item_Marchers", "Item_EnhancedMarchers", "Item_PowerSupply"}
+behaviorLib.MidItems = {"Item_PortalKey", "Item_MagicArmor2"}
+behaviorLib.LateItems = {"Item_BehemothsHeart"}
+
 
 --------------------------------
 -- Lanes
@@ -119,5 +128,101 @@ end
 -- override combat event trigger function.
 object.oncombateventOld = object.oncombatevent
 object.oncombatevent = object.oncombateventOverride
+
+function behaviorLib.CustomRetreatExecute(botBrain)
+  local leap = skills.leap
+  local unitSelf = core.unitSelf
+  local angle = core.HeadingDifference(unitSelf, core.allyMainBaseStructure:GetPosition())
+  local unitsNearby = core.AssessLocalUnits(botBrain, unitSelf:GetPosition(), 500)
+  
+
+  if unitSelf:GetHealthPercent() < 0.3 and core.NumberElements(unitsNearby.EnemyHeroes) > 0 and leap and leap:CanActivate() and angle < 0.5 then
+    return core.OrderAbility(botBrain, leap)
+  end
+  return false
+end
+
+local function CustomHarassUtilityFnOverride(target)
+  local nUtility = 0
+
+  return generics.CustomHarassUtility(target) + nUtility
+end
+behaviorLib.CustomHarassUtility = CustomHarassUtilityFnOverride
+
+local function HarassHeroExecuteOverride(botBrain)
+  local unitTarget = behaviorLib.heroTarget
+  if unitTarget == nil or not unitTarget:IsValid() then
+    return false --can not execute, move on to the next behavior
+  end
+
+  local unitSelf = core.unitSelf
+
+
+  local bActionTaken = false
+
+  --since we are using an old pointer, ensure we can still see the target for entity targeting
+
+  if not bActionTaken then
+    return object.harassExecuteOld(botBrain)
+  end
+end
+
+object.harassExecuteOld = behaviorLib.HarassHeroBehavior["Execute"]
+behaviorLib.HarassHeroBehavior["Execute"] = HarassHeroExecuteOverride
+
+local PositionSelfLogicOld = behaviorLib.PositionSelfLogic
+local function PositionSelfLogicOverride(botBrain)
+  local vecDesiredPos, unitTarget = PositionSelfLogicOld(botBrain)	
+  vecDesiredPos = core.AdjustMovementForTowerLogic(vecDesiredPos)
+  return vecDesiredPos, unitTarget
+end
+behaviorLib.PositionSelfLogic = PositionSelfLogicOverride
+
+local function DetermineArrowTarget(arrow)
+  local tLocalEnemies = core.CopyTable(core.localUnits["EnemyHeroes"])
+  local maxDistance = arrow:GetRange()
+  local maxDistanceSq = maxDistance * maxDistance
+  local myPos = core.unitSelf:GetPosition()
+  local unitTarget = nil
+  local distanceTarget = 999999999
+  for _, unitEnemy in pairs(tLocalEnemies) do
+    local enemyPos = unitEnemy:GetPosition()
+    local distanceEnemy = Vector3.Distance2DSq(myPos, enemyPos)
+    if distanceEnemy < maxDistanceSq then
+      if distanceEnemy < distanceTarget and generics.IsFreeLine(myPos, enemyPos) then
+        unitTarget = unitEnemy
+        distanceTarget = distanceEnemy
+      end
+    end
+  end
+  return unitTarget
+end
+
+local arrowTarget = nil
+local function ArrowUtility(botBrain)
+  local javelin = skills.javelin
+  if javelin and javelin:CanActivate() then
+    local unitTarget = DetermineArrowTarget(javelin)
+    if unitTarget then
+      arrowTarget = unitTarget:GetPosition()
+
+      return 60
+    end
+  end
+  arrowTarget = nil
+  return 0
+end
+local function ArrowExecute(botBrain)
+  local javelin = skills.javelin
+  if javelin and javelin:CanActivate() and arrowTarget then
+    return core.OrderAbilityPosition(botBrain, javelin, arrowTarget)
+  end
+  return false
+end
+local ArrowBehavior = {}
+ArrowBehavior["Utility"] = ArrowUtility
+ArrowBehavior["Execute"] = ArrowExecute
+ArrowBehavior["Name"] = "Arrowing"
+tinsert(behaviorLib.tBehaviors, ArrowBehavior)
 
 BotEcho('finished loading valkyrie_main')

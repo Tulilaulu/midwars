@@ -63,7 +63,7 @@ core.tLanePreferences = {Jungle = 0, Mid = 5, ShortSolo = 4, LongSolo = 2, Short
 behaviorLib.StartingItems =
 	{"Item_RunesOfTheBlight", "2 Item_MinorTotem", "Item_ManaBattery", "Item_DuckBoots" }
 behaviorLib.LaneItems =
-	{ "Item_PowerSupply", "Item_Marchers", "Item_Soulscream", "Item_Energizer", "Item_Steamboots"} -- Items: Marchers,Helm Of The Black Legion, upg Marchers to Plated Greaves
+	{ "Item_PowerSupply", "Item_Marchers", "Item_Soulscream", "Item_Energizer", "Item_GlovesOfHaste", "Item_Steamboots"} -- Items: Marchers,Helm Of The Black Legion, upg Marchers to Plated Greaves
 behaviorLib.MidItems =
 	{"Item_MagicArmor2","Item_DaemonicBreastplate", "Item_Strength6"} -- Items: Shaman's Headress, Daemonic Breastplate, Icebrand
 behaviorLib.LateItems =
@@ -116,16 +116,16 @@ end
 
 -- utility agression points if a skill/item is available for use
 object.nArrowUp = 15
-object.nCallUp = 17
+object.nCallUp = 10
 object.nStunUtil = 10 -- extra aggression if target stunned
 
 -- utility agression points that are applied to the bot upon successfully using a skill/item
-object.nCallUse = 24
-object.nArrowUse = 14
+object.nCallUse = 14
+object.nArrowUse = 20
 
 --thresholds of aggression the bot must reach to use these abilities
-object.nArrowThreshold = 30
-object.nCallThreshold = 23
+object.nArrowThreshold = 17
+object.nCallThreshold = 10
 
 local function creepsInWay(unitTarget, drawLines)
     local selfPos = core.unitSelf:GetPosition()
@@ -279,6 +279,11 @@ local function CustomHarassUtilityFnOverride(hero)
     if bTargetRooted then
         utility = utility + object.nStunUtil
     end
+    local mp = core.unitSelf:GetManaPercent()
+    local manaThresh = 0.7
+    if mp > manaThresh then
+        utility = utility + (mp - manaThresh) * 20
+    end
 
     return utility
 end
@@ -420,4 +425,4 @@ behaviorLib.DefensiveUltiBehavior["Utility"] = DefensiveUltiUtility
 behaviorLib.DefensiveUltiBehavior["Name"] = "DefensiveUlti"
 tinsert(behaviorLib.tBehaviors, behaviorLib.DefensiveUltiBehavior)
 
-illusionLib.tIllusionBehaviors["NoBehavior"] = illusionLib.Push
+object.illusionLib.tIllusionBehaviors["NoBehavior"] = object.illusionLib.Push

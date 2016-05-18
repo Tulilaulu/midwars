@@ -52,6 +52,18 @@ local sqrtTwo = math.sqrt(2)
 
 object.heroName = 'Hero_Fairy'
 
+--------------
+-- For heal --
+--------------
+object.vecHealPos = nil
+object.nHealLastCastTime = -20000
+
+function useHeal(botBrain, vecPosition)
+	object.nHealLastCastTime = HoN.GetGameTime()
+	object.vecHealPos = vecPosition
+	return core.OrderAbilityPosition(botBrain, skills.heal, vecPosition)
+end
+
 --------------------------------
 -- Lanes
 --------------------------------
@@ -219,6 +231,35 @@ function object:SkillBuild()
   else
     skills.attributeBoost:LevelUp()
   end
+end
+
+
+------------
+-- Escape --
+------------
+function behaviorLib.CustomRetreatExecute(botBrain)
+	local unitSelf = core.unitSelf
+	local vecMyPos = unitSelf:GetPosition()
+
+	local bActionTaken = false
+
+	if behaviorLib.lastRetreatUtil > object.nStunThreshold and skills.stun:CanActivate() then
+		if core.NumberElements(core.localUnits.EnemyHeroes) > 0 then
+			local unitTarget = nil
+			local nClosestDistance = 999999999
+			for _, unit in pairs(core.localUnits.EnemyHeroes) do
+				local nDistance2DSq = Vector3.Distance2DSq(vecMyPos, unit:GetPosition())
+				if nDistance2DSq < nClosestDistance then
+					unitTarget = unit
+					nClosestDistance = nDistance2DSq
+				end
+			end
+
+			bActionTaken = core.OrderAbilityPosition(botBrain, skills.stun, unitTarget:GetPosition())
+		end
+	end
+
+	return bActionTaken
 end
 
 ------------------------------------------------------

@@ -54,6 +54,18 @@ object.heroName = 'Hero_Valkyrie'
 --------------------------------
 core.tLanePreferences = {Jungle = 0, Mid = 5, ShortSolo = 4, LongSolo = 2, ShortSupport = 0, LongSupport = 0, ShortCarry = 4, LongCarry = 3}
 
+----------------------------------
+--      Armadon items
+----------------------------------
+behaviorLib.StartingItems =
+	{"Item_RunesOfTheBlight", "2 Item_MinorTotem", "Item_ManaBattery", "Item_DuckBoots" }
+behaviorLib.LaneItems =
+	{ "Item_Marchers", "Item_Energizer", "Item_Steamboots"} -- Items: Marchers,Helm Of The Black Legion, upg Marchers to Plated Greaves
+behaviorLib.MidItems =
+	{"Item_MagicArmor2","Item_DaemonicBreastplate", "Item_Strength6"} -- Items: Shaman's Headress, Daemonic Breastplate, Icebrand
+behaviorLib.LateItems =
+	{"Item_BehemothsHeart", "Item_Freeze"} -- Items: Behemoth's Heart, Upg Icebrang into Frostwolf Skull
+
 --------------------------------
 -- Skills
 --------------------------------

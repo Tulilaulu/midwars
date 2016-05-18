@@ -529,11 +529,15 @@ function core.AssessBehaviors(tOutputBehaviors)
 	local nNumEvaluatedBehaviors = 0
 	local msgs = {}
 	
+	local nLogged = 1
 	for i, curBehavior in ipairs(behaviorLib.tBehaviors) do
 		if curBehavior["Utility"] ~= nil and curBehavior["Execute"] ~= nil then
 			StartProfile(curBehavior["Name"] .. " - Utility")
 			local nUtil = curBehavior["Utility"](object)
-			msgs[i] = curBehavior["Name"] .. ": " .. tostring(nUtil)
+			if nUtil > 0 then
+                            msgs[nLogged] = curBehavior["Name"] .. ": " .. tostring(nUtil)
+                            nLogged = nLogged + 1
+                        end
 			nNumEvaluatedBehaviors = nNumEvaluatedBehaviors + 1
 			tOutputBehaviors[nNumEvaluatedBehaviors] = {Utility = nUtil, Behavior = curBehavior}
 			StopProfile()

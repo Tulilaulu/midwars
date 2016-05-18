@@ -55,7 +55,7 @@ object.heroName = 'Hero_Valkyrie'
 core.tLanePreferences = {Jungle = 0, Mid = 5, ShortSolo = 4, LongSolo = 2, ShortSupport = 0, LongSupport = 0, ShortCarry = 4, LongCarry = 3}
 
 ----------------------------------
---      Armadon items
+--      Valk items
 ----------------------------------
 behaviorLib.StartingItems =
 	{"Item_RunesOfTheBlight", "2 Item_MinorTotem", "Item_ManaBattery", "Item_DuckBoots" }
@@ -189,3 +189,36 @@ local function HarassHeroExecuteOverride(botBrain)
 end
 object.harassExecuteOld = behaviorLib.HarassHeroBehavior["Execute"]
 behaviorLib.HarassHeroBehavior["Execute"] = HarassHeroExecuteOverride
+
+local function PreGameExecuteOverride(botBrain)
+    if object.arrowThrown then
+        return object.preGameExecuteOld(botBrain)
+    end
+
+    if skills.javelin == nil then
+        p("Skill is null :(")
+        return object.preGameExecuteOld(botBrain)
+    end
+
+    if !skills.javelin:CanActivate() then
+        p("Skill is null :(")
+        return object.preGameExecuteOld(botBrain)
+    end
+
+    local enemyPool
+    if core.myTeam == HoN.GetHellbourneTeam() then
+        p("I am hellbourne")
+        enemyPool = Vector3.Create(3144.3381, 6972.4937, 256.0000)
+    else
+        p("I am legion")
+        enemyPool = Vector3.Create(8588.3457, 11719.2256, 259.2413)
+    end
+
+    if core.OrderAbilityPosition(botBrain, skills.javelin, enemyPool) then
+        p("Arrow thrown!")
+        object.arrowThrown = true
+    end
+
+end
+object.preGameExecuteOld = behaviorLib.PreGameBehavior["Execute"]
+behaviorLib.PreGameBehavior["Execute"] = PreGameExecuteOverride

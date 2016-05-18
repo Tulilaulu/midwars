@@ -14,7 +14,7 @@ object.bAttackCommands = true
 object.bAbilityCommands = true
 object.bOtherCommands = true
 
-object.bReportBehavior = true
+object.bReportBehavior = false
 object.bDebugUtility = false
 object.bDebugExecute = false
 
@@ -127,9 +127,15 @@ object.onthink = object.onthinkOverride
 -- @param: eventdata
 -- @return: none
 function object:oncombateventOverride(EventData)
-  self:oncombateventOld(EventData)
+    self:oncombateventOld(EventData)
 
-  -- custom code here
+    -- Valk arrow thrown by an ally hit an enemy
+    if EventData.InflictorName == "Projectile_Valkyrie_Ability2" and EventData.SourcePlayerName == "RETK_ValkyrieBot" then
+        if not object.arrowHit then
+            object.arrowHit = true
+            core.AllChat("LOL NOOB RETK")
+        end
+    end
 end
 -- override combat event trigger function.
 object.oncombateventOld = object.oncombatevent

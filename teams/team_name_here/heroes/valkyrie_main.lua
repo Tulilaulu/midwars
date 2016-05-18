@@ -18,6 +18,8 @@ object.bReportBehavior = true
 object.bDebugUtility = false
 object.bDebugExecute = false
 
+object.debugArrow = false -- whether to debug arrow targeting
+
 object.logger = {}
 object.logger.bWriteLog = false
 object.logger.bVerboseLog = false
@@ -129,11 +131,12 @@ local function creepsInWay(unitTarget, drawLines)
 
     local ok = true
     for i, creep in pairs(core.localUnits["EnemyCreeps"]) do
+        local name = creep:GetTypeName()
         local creepPos = creep:GetPosition()
         local d = Vector3.Length(Vector3.Cross(creepPos - selfPos, creepPos - targetPos)) / diff
         local color
         -- p(d)
-        if d > 90 then
+        if d > 120 or (name == "Creep_LegionSiege" or name == "Creep_HellbourneSiege") then
             color = "green"
         else
             color ="red"
@@ -150,6 +153,51 @@ local function creepsInWay(unitTarget, drawLines)
     return not ok
 end
 
+local CallDamage = { [0] = 0, [1] = 75, [2] = 150, [3] = 225, [4] = 300 }
+
+local function scaleMagicDamage(unitTarget, dmg)
+    return (1 - unitTarget:GetMagicResistance()) * dmg
+end
+
+local function countCreepsForCallOfValkyrie(unitTarget, drawLines)
+    local selfPos = core.unitSelf:GetPosition()
+
+    local range = 200
+    local count = 0
+    local skillDamage = CallDamage[skills.call:GetLevel()]
+
+    if unitTarget then
+        local targetPos = unitTarget:GetPosition()
+        local diff = Vector3.Distance2DSq(targetPos, selfPos)
+        if diff < range * range then
+            if drawLines then drawCross(targetPos, "green") end
+            count = count + 1
+        else
+            if drawLines then drawCross(targetPos, "red") end
+        end
+    end
+
+    for i, creep in pairs(core.localUnits["EnemyCreeps"]) do
+        local name = creep:GetTypeName()
+        local creepPos = creep:GetPosition()
+        local d = Vector3.Distance2DSq(selfPos, creepPos)
+
+        if d > range * range or (name == "Creep_LegionSiege" or name == "Creep_HellbourneSiege") then
+            color ="red"
+        else
+            color = "yellow"
+            local creepDamage = scaleMagicDamage(creep, skillDamage)
+            if creepDamage >= creep:GetHealth() then
+                count = count + 1
+                color = "green"
+            end
+        end
+        if drawLines then drawCross(creepPos, color) end
+    end
+
+    return count
+end
+
 ------------------------------------------------------
 --            onthink override                      --
 -- Called every bot tick, custom onthink code here  --
@@ -161,8 +209,9 @@ function object:onthinkOverride(tGameVariables)
 
   local unitTarget = behaviorLib.heroTarget
   if unitTarget and unitTarget:IsValid() then
-    creepsInWay(unitTarget, true)
+    creepsInWay(unitTarget, object.debugArrow)
   end
+  countCreepsForCallOfValkyrie(unitTarget, true)
 
   -- custom code here
 end
@@ -177,6 +226,8 @@ object.onthink = object.onthinkOverride
 -- @return: none
 function object:oncombateventOverride(EventData)
     self:oncombateventOld(EventData)
+    local addBonus = 0
+    --p(EventData)
 
     -- Valk arrow thrown by an ally hit an enemy
     if EventData.InflictorName == "Projectile_Valkyrie_Ability2" and EventData.SourcePlayerName == "RETK_ValkyrieBot" then
@@ -184,6 +235,16 @@ function object:oncombateventOverride(EventData)
             object.arrowHit = true
             core.AllChat("LOL NOOB RETK")
         end
+        addBonus = object.nArrowUse
+    elseif EventData.InflictorName == "Ability_Valkyrie1" and EventData.SourcePlayerName == "RETK_ValkyrieBot" then
+        p("Used call of valkyrie")
+        addBonus = object.nCallUse
+    end
+
+    if addBonus > 0 then
+        --decay before we add
+        core.DecayBonus(self)
+        core.nHarassBonus = core.nHarassBonus + addBonus
     end
 end
 -- override combat event trigger function.
@@ -255,7 +316,7 @@ local function HarassHeroExecuteOverride(botBrain)
     end
 
     --Arrow
-    if not bActionTaken and not creepsInWay(unitTarget, false) and abilArrow:CanActivate() then
+    if not bActionTaken and not creepsInWay(unitTarget, false) and abilArrow:CanActivate() and nLastHarassUtility >= object.nArrowThreshold then
         local nRange = abilArrow:GetRange()
         if nTargetDistanceSq < (nRange * nRange) then
             if nLastHarassUtility > object.nArrowThreshold then
@@ -265,12 +326,12 @@ local function HarassHeroExecuteOverride(botBrain)
     end
 
     --Call of the Valkyrie
-    if not bActionTaken and abilCall:CanActivate() then
-        local nRange = abilCall:GetRange()
-        if nTargetDistanceSq < (nRange * nRange) then
-            if nLastHarassUtility > object.nCallThreshold then
-                bActionTaken = core.OrderAbility(botBrain, abilCall)
-            end
+    local numCallTargets = countCreepsForCallOfValkyrie(unitTarget, false)
+    if not bActionTaken and abilCall:CanActivate() and nLastHarassUtility >= object.nCallThreshold then
+        local nRange = 180
+        if nTargetDistanceSq < (nRange * nRange) or numCallTargets >= 2 then
+            bActionTaken = core.OrderAbility(botBrain, abilCall)
+            p("Doing call of valkyrie, hero dist: " .. tostring(math.sqrt(nTargetDistanceSq)) .. " creeps: " .. tostring(numCallTargets))
         end
     end
 

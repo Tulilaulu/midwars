@@ -419,3 +419,5 @@ behaviorLib.DefensiveUltiBehavior["Execute"] = DefensiveUltiExecute
 behaviorLib.DefensiveUltiBehavior["Utility"] = DefensiveUltiUtility
 behaviorLib.DefensiveUltiBehavior["Name"] = "DefensiveUlti"
 tinsert(behaviorLib.tBehaviors, behaviorLib.DefensiveUltiBehavior)
+
+illusionLib.tIllusionBehaviors["NoBehavior"] = illusionLib.Push

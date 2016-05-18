@@ -79,8 +79,10 @@ function object:SkillBuild()
     skills.leap = unitSelf:GetAbility(2)
     skills.ulti = unitSelf:GetAbility(3)
     skills.attributeBoost = unitSelf:GetAbility(4)
+    skills.taunt = unitSelf:GetAbility(8)
+    skills.courier = unitSelf:GetAbility(12)
 
-    if skills.call and skills.javelin and skills.leap and skills.ulti and skills.attributeBoost then
+    if skills.call and skills.javelin and skills.leap and skills.ulti and skills.attributeBoost and skills.taunt and skills.courier then
       bSkillsValid = true
     else
       return

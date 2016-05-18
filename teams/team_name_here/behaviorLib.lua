@@ -2851,7 +2851,7 @@ function behaviorLib.HealAtWellUtility(botBrain)
 		local nDist = Vector3.Distance2D(vecWellPos, unitSelf:GetPosition())
                 local healthUtil = behaviorLib.healAtWellHealthFactor * behaviorLib.WellHealthUtility(hpPercent)
                 local proximityUtil = behaviorLib.healAtWellProximityFactor * behaviorLib.WellProximityUtility(nDist)
-                BotEcho("HealAtWell: healthUtil: " .. tostring(healthUtil) .. " proximityUtil: " .. tostring(proximityUtil))
+                -- BotEcho("HealAtWell: healthUtil: " .. tostring(healthUtil) .. " proximityUtil: " .. tostring(proximityUtil))
 		nUtility = healthUtil + proximityUtil
 	end
 	-- add (1 - 0.3%) * 8 for default utility and 30% mana remaining.

@@ -53,8 +53,8 @@ object.heroName = 'Hero_Valkyrie'
 
 behaviorLib.StartingItems = {"Item_ManaBattery", "2 Item_MinorTotem", "Item_HealthPotion", "Item_RunesOfTheBlight"}
 behaviorLib.LaneItems = {"Item_Marchers", "Item_EnhancedMarchers", "Item_PowerSupply"}
-behaviorLib.MidItems = {"Item_PortalKey", "Item_MagicArmor2"}
-behaviorLib.LateItems = {"Item_BehemothsHeart"}
+behaviorLib.MidItems = {"Item_Sicarius", "Item_ManaBurn1", "Item_ManaBurn2"}
+behaviorLib.LateItems = {"Item_Immunity", "Item_BehemothsHeart"}
 
 
 --------------------------------
@@ -123,7 +123,17 @@ object.onthink = object.onthinkOverride
 function object:oncombateventOverride(EventData)
   self:oncombateventOld(EventData)
 
-  -- custom code here
+  local addBonus = 0
+  if EventData.Type == "Attack" then
+    local unitTarget = EventData.TargetUnit
+    if EventData.InflictorName == "Projectile_Valkyrie_Ability2" and unitTarget:IsHero() then
+      addBonus = addBonus + 50
+    end
+  end
+
+  if addBonus > 0 then
+    core.nHarassBonus = core.nHarassBonus + addBonus
+  end
 end
 -- override combat event trigger function.
 object.oncombateventOld = object.oncombatevent
@@ -132,18 +142,28 @@ object.oncombatevent = object.oncombateventOverride
 function behaviorLib.CustomRetreatExecute(botBrain)
   local leap = skills.leap
   local unitSelf = core.unitSelf
-  local angle = core.HeadingDifference(unitSelf, core.allyMainBaseStructure:GetPosition())
   local unitsNearby = core.AssessLocalUnits(botBrain, unitSelf:GetPosition(), 500)
-  
 
-  if unitSelf:GetHealthPercent() < 0.3 and core.NumberElements(unitsNearby.EnemyHeroes) > 0 and leap and leap:CanActivate() and angle < 0.5 then
-    return core.OrderAbility(botBrain, leap)
+  if unitSelf:GetHealthPercent() < 0.3 and core.NumberElements(unitsNearby.EnemyHeroes) > 0 then
+    local ulti = skills.ulti
+    if ulti and ulti:CanActivate() then
+      return core.OrderAbility(botBrain, ulti)
+    end
+    local angle = core.HeadingDifference(unitSelf, core.allyMainBaseStructure:GetPosition())
+    if leap and leap:CanActivate() and angle < 0.5 then
+      return core.OrderAbility(botBrain, leap)
+    end
   end
   return false
 end
 
 local function CustomHarassUtilityFnOverride(target)
   local nUtility = 0
+  
+  local call = skills.call
+  if call and call:CanActivate() then
+    nUtility = nUtility + 10
+  end
 
   return generics.CustomHarassUtility(target) + nUtility
 end
@@ -160,7 +180,10 @@ local function HarassHeroExecuteOverride(botBrain)
 
   local bActionTaken = false
 
-  --since we are using an old pointer, ensure we can still see the target for entity targeting
+  local call = skills.call
+  if call and call:CanActivate() and Vector3.Distance2D(unitTarget:GetPosition(), unitSelf:GetPosition()) < 650 then
+    bActionTaken = core.OrderAbility(botBrain, call)
+  end
 
   if not bActionTaken then
     return object.harassExecuteOld(botBrain)

@@ -51,8 +51,8 @@ object.heroName = 'Hero_PuppetMaster'
 
 
 behaviorLib.StartingItems = {"Item_ManaBattery", "2 Item_MinorTotem", "Item_HealthPotion", "Item_RunesOfTheBlight"}
-behaviorLib.LaneItems = {"Item_Marchers", "Item_EnhancedMarchers", "Item_PowerSupply"}
-behaviorLib.MidItems = {"Item_PortalKey", "Item_MagicArmor2"}
+behaviorLib.LaneItems = {"Item_Marchers", "Item_PowerSupply", "Item_Steamboots"}
+behaviorLib.MidItems = {"Item_Stealth", "Item_ElderParasite", "Item_Weapon3"}
 behaviorLib.LateItems = {"Item_BehemothsHeart"}
 
 
@@ -86,14 +86,14 @@ function object:SkillBuild()
     return
   end
 
-  if skills.ulti:CanLevelUp() then
-    skills.ulti:LevelUp()
-  elseif skills.whip:CanLevelUp() then
+  if skills.whip:CanLevelUp() then
     skills.whip:LevelUp()
   elseif skills.hold:CanLevelUp() then
     skills.hold:LevelUp()
   elseif skills.show:CanLevelUp() then
     skills.show:LevelUp()
+  elseif skills.ulti:CanLevelUp() then
+    skills.ulti:LevelUp()
   else
     skills.attributeBoost:LevelUp()
   end
@@ -122,7 +122,19 @@ object.onthink = object.onthinkOverride
 function object:oncombateventOverride(EventData)
   self:oncombateventOld(EventData)
 
-  -- custom code here
+  local addBonus = 0
+  
+  if EventData.Type == "Ability" then
+    if EventData.InflictorName == "State_PuppetMaster_Ability1" and EventData.SourceUnit == core.unitSelf:GetUniqueID() then
+      addBonus = addBonus + 20
+    elseif EventData.InflictorName == "State_PuppetMaster_Ability2" and EventData.SourceUnit == core.unitSelf:GetUniqueID() then
+      addBonus = addBonus + 20
+    end
+  end
+
+  if addBonus > 0 then
+    core.nHarassBonus = core.nHarassBonus + addBonus
+  end
 end
 -- override combat event trigger function.
 object.oncombateventOld = object.oncombatevent
@@ -158,17 +170,17 @@ local function HarassHeroExecuteOverride(botBrain)
     
     local hold = skills.hold
     local nRange = hold:GetRange()
-    if hold:CanActivate() and nTargetDistanceSq < (nRange * nRange) then
+    if hold:CanActivate() and not unitTarget:HasState("State_PuppetMaster_Ability2") and nTargetDistanceSq < (nRange * nRange) then
       bActionTaken = core.OrderAbilityEntity(botBrain, hold, unitTarget)
     end
-    
+
     local show = skills.show
     nRange = show:GetRange()
     local unitsNearby = core.AssessLocalUnits(botBrain, unitTarget, 400)
     
     local nEnemies = core.NumberElements(unitsNearby.Enemies)
 
-    if not bActionTaken and show:CanActivate() and nTargetDistanceSq < (nRange * nRange) and nEnemies > 0 then
+    if not bActionTaken and not unitTarget:HasState("State_PuppetMaster_Ability1") and show:CanActivate() and nTargetDistanceSq < (nRange * nRange) and nEnemies > 0 then
       bActionTaken = core.OrderAbilityEntity(botBrain, show, unitTarget)
     end
   end

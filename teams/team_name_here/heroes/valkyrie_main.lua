@@ -376,3 +376,21 @@ local function PreGameExecuteOverride(botBrain)
 end
 object.preGameExecuteOld = behaviorLib.PreGameBehavior["Execute"]
 behaviorLib.PreGameBehavior["Execute"] = PreGameExecuteOverride
+
+local function DefensiveUltiUtility(botBrain)
+    local hpPercent = core.unitSelf:GetHealthPercent()
+    if skills.ulti:CanActivate() and hpPercent < 0.15 then
+        return 95
+    end
+    return 0
+end
+
+local function DefensiveUltiExecute(botBrain)
+    return core.OrderAbility(botBrain, skills.ulti)
+end
+
+behaviorLib.DefensiveUltiBehavior = {}
+behaviorLib.DefensiveUltiBehavior["Execute"] = DefensiveUltiExecute
+behaviorLib.DefensiveUltiBehavior["Utility"] = DefensiveUltiUtility
+behaviorLib.DefensiveUltiBehavior["Name"] = "DefensiveUlti"
+tinsert(behaviorLib.tBehaviors, behaviorLib.DefensiveUltiBehavior)

@@ -19,6 +19,7 @@ object.bDebugUtility = false
 object.bDebugExecute = false
 
 object.debugArrow = false -- whether to debug arrow targeting
+object.debugCall = false -- whether to debug call of the valkyrie targeting
 
 object.logger = {}
 object.logger.bWriteLog = false
@@ -113,6 +114,7 @@ end
 -- utility agression points if a skill/item is available for use
 object.nArrowUp = 15
 object.nCallUp = 17
+object.nStunUtil = 10 -- extra aggression if target stunned
 
 -- utility agression points that are applied to the bot upon successfully using a skill/item
 object.nCallUse = 24
@@ -154,6 +156,7 @@ local function creepsInWay(unitTarget, drawLines)
 end
 
 local CallDamage = { [0] = 0, [1] = 75, [2] = 150, [3] = 225, [4] = 300 }
+local LeapRange = { [0] = 0, [1] = 630, [2] = 710, [3] = 790, [4] = 870 }
 
 local function scaleMagicDamage(unitTarget, dmg)
     return (1 - unitTarget:GetMagicResistance()) * dmg
@@ -211,7 +214,7 @@ function object:onthinkOverride(tGameVariables)
   if unitTarget and unitTarget:IsValid() then
     creepsInWay(unitTarget, object.debugArrow)
   end
-  countCreepsForCallOfValkyrie(unitTarget, true)
+  countCreepsForCallOfValkyrie(unitTarget, object.debugCall)
 
   -- custom code here
 end
@@ -261,11 +264,7 @@ local function CustomHarassUtilityFnOverride(hero)
     if not unitTarget or not unitTarget:IsValid() or not bSkillsValid then
         return 0 --can not execute, move on to the next behavior
     end
-
-    -- local abilTaunt = skills.taunt
-    -- if abilTaunt:CanActivate() then
-    --     return 100
-    -- end
+    local bTargetRooted = unitTarget:IsStunned() or unitTarget:IsImmobilized() or unitTarget:GetMoveSpeed() < 200
 
     local utility = 0
     if (not creepsInWay(unitTarget, false)) and skills.arrow:CanActivate() then
@@ -273,6 +272,9 @@ local function CustomHarassUtilityFnOverride(hero)
     end
     if skills.call:CanActivate() then
         utility = utility + object.nCallUp
+    end
+    if bTargetRooted then
+        utility = utility + object.nStunUtil
     end
 
     return utility
@@ -288,11 +290,14 @@ local function HarassHeroExecuteOverride(botBrain)
     local unitSelf = core.unitSelf
 
     local vecMyPosition = unitSelf:GetPosition()
+    local vecAfterLeap = vecMyPosition + unitSelf:GetHeading() * LeapRange[skills.leap:GetLevel()]
+
     local nAttackRangeSq = core.GetAbsoluteAttackRangeToUnit(unitSelf, unitTarget)
     nAttackRangeSq = nAttackRangeSq * nAttackRangeSq
 
     local vecTargetPosition = unitTarget:GetPosition()
     local nTargetDistanceSq = Vector3.Distance2DSq(vecMyPosition, vecTargetPosition)
+    local nTargetDistanceSqAfterLeap = Vector3.Distance2DSq(vecAfterLeap, vecTargetPosition)
     local bTargetRooted = unitTarget:IsStunned() or unitTarget:IsImmobilized() or unitTarget:GetMoveSpeed() < 200
     local bCanSeeUnit = core.CanSeeUnit(botBrain, unitTarget)
 
@@ -306,12 +311,19 @@ local function HarassHeroExecuteOverride(botBrain)
     local abilCall = skills.call
 
     --Taunt
-    if not bActionTaken and bCanSeeUnit then        
+    if not bActionTaken and bCanSeeUnit then
         if abilTaunt:CanActivate() then
             local nRange = 1200
             if nTargetDistanceSq < (nRange * nRange) then
                 bActionTaken = core.OrderAbilityEntity(botBrain, abilTaunt, unitTarget)
             end
+        end
+    end
+
+    -- Leap
+    if skills.leap:CanActivate() and (bTargetRooted or unitTarget:GetHealthPercent() < 0.3) then
+        if math.sqrt(nTargetDistanceSqAfterLeap) < 0.5 * math.sqrt(nTargetDistanceSq) then
+            bActionTaken = core.OrderAbility(botBrain, skills.leap)
         end
     end
 

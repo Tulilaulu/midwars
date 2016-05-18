@@ -3645,7 +3645,7 @@ tinsert(behaviorLib.tBehaviors, behaviorLib.ShopBehavior)
 -- Pick Rune --
 ---------------
 behaviorLib.tRuneToPick = nil
-behaviorLib.nRuneGrabRange = 1000
+behaviorLib.nRuneGrabRange = 2000
 -- 30 if there is rune within 1000 and we see it
 function behaviorLib.PickRuneUtility(botBrain)
 	-- [Difficulty: Easy] Bots do not get runes on easy

@@ -36,6 +36,8 @@ behaviorLib.nPositionHeroInfluenceMul = 4.0
 behaviorLib.nCreepPushbackMul = 1
 behaviorLib.nTargetPositioningMul = 1
 behaviorLib.nTargetCriticalPositioningMul = 2
+behaviorLib.healAtWellProximityFactor = 1.0
+behaviorLib.healAtWellHealthFactor = 1.0
 
 behaviorLib.nLastPositionTime = 0
 behaviorLib.vecLastDesiredPosition = Vector3.Create()
@@ -2847,8 +2849,10 @@ function behaviorLib.HealAtWellUtility(botBrain)
 	if hpPercent < 0.95 or mpPercent < 0.95 then
 		local vecWellPos = (core.allyWell and core.allyWell:GetPosition()) or Vector3.Create()
 		local nDist = Vector3.Distance2D(vecWellPos, unitSelf:GetPosition())
- 
-		nUtility = behaviorLib.WellHealthUtility(hpPercent) + behaviorLib.WellProximityUtility(nDist)
+                local healthUtil = behaviorLib.healAtWellHealthFactor * behaviorLib.WellHealthUtility(hpPercent)
+                local proximityUtil = behaviorLib.healAtWellProximityFactor * behaviorLib.WellProximityUtility(nDist)
+                BotEcho("HealAtWell: healthUtil: " .. tostring(healthUtil) .. " proximityUtil: " .. tostring(proximityUtil))
+		nUtility = healthUtil + proximityUtil
 	end
 	-- add (1 - 0.3%) * 8 for default utility and 30% mana remaining.
 	nUtility = nUtility + (1 - mpPercent) * behaviorLib.nHealAtWellEmptyManaPoolUtility

@@ -69,6 +69,9 @@ behaviorLib.MidItems =
 behaviorLib.LateItems =
 	{"Item_BehemothsHeart", "Item_Freeze"} -- Items: Behemoth's Heart, Upg Icebrang into Frostwolf Skull
 
+behaviorLib.healAtWellHealthFactor = 1.3
+behaviorLib.healAtWellProximityFactor = 0.5
+
 --------------------------------
 -- Skills
 --------------------------------

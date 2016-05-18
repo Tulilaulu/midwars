@@ -135,4 +135,57 @@ end
 object.oncombateventOld = object.oncombatevent
 object.oncombatevent = object.oncombateventOverride
 
-BotEcho('finished loading valkyrie_main')
+------------------------
+--CustomHarassUtility
+------------------------
+local function CustomHarassUtilityFnOverride(hero)
+    local abilTaunt = skills.taunt
+    if abilTaunt:CanActivate() then
+        return 100
+    end
+
+    return 0 -- The default
+end
+behaviorLib.CustomHarassUtility = CustomHarassUtilityFnOverride
+
+local function HarassHeroExecuteOverride(botBrain)
+	local unitTarget = behaviorLib.heroTarget
+	if not unitTarget or not unitTarget:IsValid() then
+		return false --can not execute, move on to the next behavior
+	end
+
+	local unitSelf = core.unitSelf
+
+	local vecMyPosition = unitSelf:GetPosition()
+	local nAttackRangeSq = core.GetAbsoluteAttackRangeToUnit(unitSelf, unitTarget)
+	nAttackRangeSq = nAttackRangeSq * nAttackRangeSq
+
+	local vecTargetPosition = unitTarget:GetPosition()
+	local nTargetDistanceSq = Vector3.Distance2DSq(vecMyPosition, vecTargetPosition)
+	local bTargetRooted = unitTarget:IsStunned() or unitTarget:IsImmobilized() or unitTarget:GetMoveSpeed() < 200
+	local bCanSeeUnit = core.CanSeeUnit(botBrain, unitTarget)
+
+	local nLastHarassUtility = behaviorLib.lastHarassUtil
+
+	local bActionTaken = false
+
+	local nNow = HoN.GetGameTime()
+	
+	--Taunting!!!
+	if not bActionTaken and bCanSeeUnit then		
+		local abilTaunt = skills.taunt
+		if abilTaunt:CanActivate() then
+			local nRange = 1200
+			if nTargetDistanceSq < (nRange * nRange) then
+				bActionTaken = core.OrderAbilityEntity(botBrain, abilTaunt, unitTarget)
+			end
+		end
+	end
+
+	if not bActionTaken then
+		return object.harassExecuteOld(botBrain)
+	end
+
+end
+object.harassExecuteOld = behaviorLib.HarassHeroBehavior["Execute"]
+behaviorLib.HarassHeroBehavior["Execute"] = HarassHeroExecuteOverride

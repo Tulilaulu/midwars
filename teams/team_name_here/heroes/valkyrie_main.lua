@@ -294,6 +294,7 @@ local function HarassHeroExecuteOverride(botBrain)
 
     local vecMyPosition = unitSelf:GetPosition()
     local vecAfterLeap = vecMyPosition + unitSelf:GetHeading() * LeapRange[skills.leap:GetLevel()]
+    local leapPosInTowerRange = #core.GetTowersThreateningPosition(vecAfterLeap, 0, unitSelf:GetTeam()) > 0
 
     local nAttackRangeSq = core.GetAbsoluteAttackRangeToUnit(unitSelf, unitTarget)
     nAttackRangeSq = nAttackRangeSq * nAttackRangeSq
@@ -324,8 +325,17 @@ local function HarassHeroExecuteOverride(botBrain)
     end
 
     -- Leap
-    if skills.leap:CanActivate() and (bTargetRooted or unitTarget:GetHealthPercent() < 0.3) then
-        if math.sqrt(nTargetDistanceSqAfterLeap) < 0.5 * math.sqrt(nTargetDistanceSq) then
+    local leapHealthPercent
+    if leapPosInTowerRange then
+        leapHealthPercent = 0.10
+    elseif not bTargetRooted then
+        leapHealthPercent = 0.20
+    else
+        leapHealthPercent = 0.50
+    end
+
+    if skills.leap:CanActivate() and (unitTarget:GetHealthPercent() < leapHealthPercent) then
+        if math.sqrt(nTargetDistanceSqAfterLeap) < 0.8 * math.sqrt(nTargetDistanceSq) then
             bActionTaken = core.OrderAbility(botBrain, skills.leap)
         end
     end

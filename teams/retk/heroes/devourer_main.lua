@@ -33,6 +33,7 @@ runfile "bots/teams/retk/botbraincore.lua"
 runfile "bots/eventsLib.lua"
 runfile "bots/metadata.lua"
 runfile "bots/teams/retk/behaviorLib.lua"
+runfile "bots/teams/retk/utils.lua"
 runfile "bots/teams/retk/courier.lua"
 
 local core, eventsLib, behaviorLib, metadata, skills = object.core, object.eventsLib, object.behaviorLib, object.metadata, object.skills

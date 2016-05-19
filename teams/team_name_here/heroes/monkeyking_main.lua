@@ -71,6 +71,16 @@ behaviorLib.healAtWellProximityFactor = 0.5
 --------------------------------
 -- Skills
 --------------------------------
+
+--order of leveling
+object.tSkills = {
+   0, 1, 2, 1, 1,
+   3, 2, 2, 0, 0,
+   1, 2, 0, 3, 3,
+   4, 4, 4, 4, 4,
+   4, 4, 4, 4, 4,
+}
+
 local bSkillsValid = false
 function object:SkillBuild()
   local unitSelf = self.core.unitSelf

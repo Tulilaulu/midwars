@@ -67,6 +67,8 @@ function object:SkillBuild()
     skills.skin = unitSelf:GetAbility(2)
     skills.ulti = unitSelf:GetAbility(3)
     skills.attributeBoost = unitSelf:GetAbility(4)
+    skills.taunt = unitSelf:GetAbility(8)
+    skills.courier = unitSelf:GetAbility(12)
 
     if skills.hook and skills.fart and skills.skin and skills.ulti and skills.attributeBoost then
       bSkillsValid = true

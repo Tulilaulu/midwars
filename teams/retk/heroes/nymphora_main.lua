@@ -167,6 +167,8 @@ function object:SkillBuild()
 		skills.stun		= unitSelf:GetAbility(2)
 		skills.teleport	= unitSelf:GetAbility(3)
 		skills.recall	= unitSelf:GetAbility(5)
+                skills.taunt = unitSelf:GetAbility(8)
+                skills.courier = unitSelf:GetAbility(12)
 	end
 
 	if unitSelf:GetAbilityPointsAvailable() <= 0 then

@@ -421,7 +421,7 @@ function behaviorLib.UseRunesOfTheBlightUtility(botBrain)
 		local vecOrigin = Vector3.Create(-1000, -20)
 		
 		local ret = core.ATanFn(nHealthMissing, vecPoint, vecOrigin, 100)
-		BotEcho("Blight: " .. tostring(ret) .. " nHealthMissing: " .. tostring(nHealthMissing))
+		-- BotEcho("Blight: " .. tostring(ret) .. " nHealthMissing: " .. tostring(nHealthMissing))
 		return ret
 	elseif not behaviorLib.itemBlights and usedRunes then
 		behaviorLib.removeItemBehavior("Item_RunesOfTheBlight")

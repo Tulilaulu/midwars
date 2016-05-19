@@ -119,6 +119,161 @@ function object:SkillBuild()
   end
 end
 
+-- These are bonus agression points if a skill/item is available for use
+object.nDashUp = 10
+object.nPoleUp = 12 
+object.nRockUp = 35
+ 
+-- These are bonus agression points that are applied to the bot upon successfully using a skill/item
+object.nDashUse = 40
+object.nPoleUse = 50
+object.nRockUse = 55
+ 
+--These are thresholds of aggression the bot must reach to use these abilities
+object.nDashThreshold = 20
+object.nPoleThreshold = 10
+object.nRockThreshold = 60
+
+------------------------------------------------------
+--            CustomHarassUtility Override          --
+-- Change Utility according to usable spells here   --
+------------------------------------------------------
+-- @param: IunitEntity hero
+-- @return: number
+local function CustomHarassUtilityFnOverride(hero)
+    local nUtil = 0
+     
+    if skills.dash:CanActivate() then
+        nUtil = nUtil + object.nDashUp
+    end
+ 
+    if skills.pole:CanActivate() then
+        nUtil = nUtil + object.nPoleUp
+    end
+ 
+    if skills.rock:CanActivate() then
+        nUtil = nUtil + object.nRockUp
+    end
+    return nUtil
+end
+-- assisgn custom Harrass function to the behaviourLib object
+behaviorLib.CustomHarassUtility = CustomHarassUtilityFnOverride  
+
+
+----------------------------------------------
+--            OncombatEvent Override        --
+-- Use to check for Infilictors (fe. Buffs) --
+----------------------------------------------
+-- @param: EventData
+-- @return: none 
+function object:oncombateventOverride(EventData)
+ --   self:oncombateventOld(EventData)
+    local nAddBonus = 0
+ 
+    if EventData.Type == "Ability" then
+        if EventData.InflictorName == "Ability_MonkeyKing2" then
+            nAddBonus = nAddBonus + object.nDashUse
+        elseif EventData.InflictorName == "Ability_MonkeyKing1" then
+            nAddBonus = nAddBonus + object.nPoleUse
+        elseif EventData.InflictorName == "Ability_MonkeyKing3" then
+            nAddBonus = nAddBonus + object.nRockUse
+        end
+    end
+ 
+   if nAddBonus > 0 then
+        core.DecayBonus(self)
+        core.nHarassBonus = core.nHarassBonus + nAddBonus
+    end
+ 
+end
+-- override combat event trigger function.
+object.oncombateventOld = object.oncombatevent
+object.oncombatevent     = object.oncombateventOverride
+
+
+--------------------------------------------------------------
+--                    Harass Behavior                       --
+-- All code how to use abilities against enemies goes here  --
+--------------------------------------------------------------
+-- @param botBrain: CBotBrain
+-- @return: none
+--
+local function HarassHeroExecuteOverride(botBrain)
+     
+    local unitTarget = behaviorLib.heroTarget
+    if unitTarget == nil then
+        return object.harassExecuteOld(botBrain)  --Target is invalid, move on to the next behavior
+    end
+     
+     
+    local unitSelf = core.unitSelf
+    local vecMyPosition = unitSelf:GetPosition() 
+    local nAttackRange = core.GetAbsoluteAttackRangeToUnit(unitSelf, unitTarget)
+    local nMyExtraRange = core.GetExtraRange(unitSelf)
+     
+    local vecTargetPosition = unitTarget:GetPosition()
+    local nTargetExtraRange = core.GetExtraRange(unitTarget)
+    local nTargetDistanceSq = Vector3.Distance2DSq(vecMyPosition, vecTargetPosition)
+ 
+     
+    local nLastHarassUtility = behaviorLib.lastHarassUtil
+    local bCanSee = core.CanSeeUnit(botBrain, unitTarget)    
+    local bActionTaken = false
+ 
+    --since we are using an old pointer, ensure we can still see the target for entity targeting
+    if core.CanSeeUnit(botBrain, unitTarget) then
+        local bTargetVuln = unitTarget:IsStunned() or unitTarget:IsImmobilized() or unitTarget:IsPerplexed()
+        -- Dash
+        if not bActionTaken and not bTargetVuln then
+            if skills.dash:CanActivate() and nLastHarassUtility > botBrain.nDashThreshold then
+                local nRange = skills.dash:GetRange()
+                if nTargetDistanceSq < (nRange * nRange) then
+                    bActionTaken = core.OrderAbilityPosition(botBrain, skills.dash, vecTargetPosition)
+                end          
+            end
+        end
+    end
+ 
+ 
+     -- pole
+    if not bActionTaken then
+        if skills.pole:CanActivate() and nLastHarassUtility > botBrain.nPoleThreshold then
+            local nRange = skills.pole:GetRange()
+            if nTargetDistanceSq < (nRange * nRange) then
+                bActionTaken = core.OrderAbilityEntity(botBrain, skills.pole, unitTarget)
+            else
+                bActionTaken = core.OrderMoveToUnitClamp(botBrain, unitSelf, unitTarget)
+            end
+        end
+    end
+ 
+     -- rock
+    if core.CanSeeUnit(botBrain, unitTarget) then
+        if not bActionTaken then --and bTargetVuln then
+            if skills.rock:CanActivate() and nLastHarassUtility > botBrain.nRockThreshold then
+                local nRange = abilBlazing:GetRange()
+                if nTargetDistanceSq < (nRange * nRange) then
+                    bActionTaken = core.OrderAbilityEntity(botBrain, skills.rock, unitTarget)
+                else
+                    bActionTaken = core.OrderMoveToUnitClamp(botBrain, unitSelf, unitTarget)
+                end
+            end
+        end 
+    end 
+ 
+     
+    if not bActionTaken then
+        return object.harassExecuteOld(botBrain) 
+    end
+end
+ 
+ 
+ 
+-- overload the behaviour stock function with custom 
+object.harassExecuteOld = behaviorLib.HarassHeroBehavior["Execute"]
+behaviorLib.HarassHeroBehavior["Execute"] = HarassHeroExecuteOverride
+
+
 ------------------------------------------------------
 --            onthink override                      --
 -- Called every bot tick, custom onthink code here  --

@@ -53,6 +53,21 @@ object.heroName = 'Hero_MonkeyKing'
 --------------------------------
 core.tLanePreferences = {Jungle = 0, Mid = 5, ShortSolo = 0, LongSolo = 0, ShortSupport = 0, LongSupport = 0, ShortCarry = 0, LongCarry = 0}
 
+----------------------------------
+--      MK items
+----------------------------------
+behaviorLib.StartingItems =
+	{"Item_LoggersHatchet", "2 Item_MinorTotem", "Item_ManaBattery"}
+behaviorLib.LaneItems =
+	{ "Item_PowerSupply", "Item_Marchers", " Item_Punchdagger", "Item_EnhancedMarchers"} -- Items: power supply, ghost marchers
+behaviorLib.MidItems =
+	{"Item_Manatube", "Item_Lifetube", "Item_Glowstone", "Item_Protect", "Item_GuardianRing", "Item_Ringmail", "Item_SolsBulwark"} -- Items: nullstone, sols bulwark
+behaviorLib.LateItems =
+	{"Item_Warhammer", "Item_Pierce", "Item_Voulge", "Item_Weapon3"} -- Items: shieldbreaker, savage mace
+
+behaviorLib.healAtWellHealthFactor = 1.3
+behaviorLib.healAtWellProximityFactor = 0.5
+
 --------------------------------
 -- Skills
 --------------------------------
@@ -66,6 +81,8 @@ function object:SkillBuild()
     skills.rock = unitSelf:GetAbility(2)
     skills.ulti = unitSelf:GetAbility(3)
     skills.attributeBoost = unitSelf:GetAbility(4)
+    skills.taunt = unitSelf:GetAbility(8)
+    skills.courier = unitSelf:GetAbility(12)	
 
     if skills.dash and skills.pole and skills.rock and skills.ulti and skills.attributeBoost then
       bSkillsValid = true

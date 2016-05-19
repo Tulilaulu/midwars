@@ -1611,7 +1611,7 @@ behaviorLib.rangedHarassBuffer = 300
 behaviorLib.harassUtilityWeight = 1.0
 
 function behaviorLib.HarassHeroUtility(botBrain)
-	local bDebugEchos = false
+	local bDebugEchos = true
 	
 	--if core.unitSelf:GetTypeName() == "Hero_Predator" then bDebugEchos = true end
 		

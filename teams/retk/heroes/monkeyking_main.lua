@@ -123,9 +123,9 @@ object.nPoleUp = 12
 object.nRockUp = 8
  
 -- These are bonus agression points that are applied to the bot upon successfully using a skill/item
-object.nDashUse = 15
-object.nPoleUse = 20
-object.nRockUse = 12
+object.nDashUse = 10
+object.nPoleUse = 15
+object.nRockUse = 7
  
 --These are thresholds of aggression the bot must reach to use these abilities
 object.nDashThreshold = 15
@@ -161,6 +161,8 @@ local function CustomHarassUtilityFnOverride(hero)
 end
 -- assisgn custom Harrass function to the behaviourLib object
 behaviorLib.CustomHarassUtility = CustomHarassUtilityFnOverride  
+
+behaviorLib.diveThreshold = 100
 
 
 ----------------------------------------------
@@ -231,6 +233,7 @@ local function HarassHeroExecuteOverride(botBrain)
             if skills.dash:CanActivate() and nLastHarassUtility > botBrain.nDashThreshold then
                 local nRange = skills.dash:GetRange()
                 if nTargetDistanceSq < (nRange * nRange) then
+                    p("casting dash")
                     bActionTaken = core.OrderAbility(botBrain, skills.dash)
                 end          
             end
@@ -243,8 +246,10 @@ local function HarassHeroExecuteOverride(botBrain)
         if skills.pole:CanActivate() and nLastHarassUtility > botBrain.nPoleThreshold then
             local nRange = skills.pole:GetRange()
             if nTargetDistanceSq < (nRange * nRange) then
+                p("casting pole")
                 bActionTaken = core.OrderAbilityEntity(botBrain, skills.pole, unitTarget)
             else
+                p("moving to pole range")
                 bActionTaken = core.OrderMoveToUnitClamp(botBrain, unitSelf, unitTarget)
             end
         end
@@ -254,10 +259,12 @@ local function HarassHeroExecuteOverride(botBrain)
     if core.CanSeeUnit(botBrain, unitTarget) then
         if not bActionTaken then --and bTargetVuln then
             if skills.rock:CanActivate() and nLastHarassUtility > botBrain.nRockThreshold then
-                local nRange = 100 -- FIXME
+                local nRange = 200 -- FIXME
                 if nTargetDistanceSq < (nRange * nRange) then
+                    p("casting rock")
                     bActionTaken = core.OrderAbility(botBrain, skills.rock)
                 else
+                    p("moving to rock range")
                     bActionTaken = core.OrderMoveToUnitClamp(botBrain, unitSelf, unitTarget)
                 end
             end

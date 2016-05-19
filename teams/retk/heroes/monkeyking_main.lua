@@ -169,9 +169,9 @@ behaviorLib.CustomHarassUtility = CustomHarassUtilityFnOverride
 -- @param: EventData
 -- @return: none 
 function object:oncombateventOverride(EventData)
- --   self:oncombateventOld(EventData)
+    self:oncombateventOld(EventData)
     local nAddBonus = 0
- 
+
     if EventData.Type == "Ability" then
         if EventData.InflictorName == "Ability_MonkeyKing2" then
             nAddBonus = nAddBonus + object.nDashUse
@@ -190,7 +190,7 @@ function object:oncombateventOverride(EventData)
 end
 -- override combat event trigger function.
 object.oncombateventOld = object.oncombatevent
-object.oncombatevent     = object.oncombateventOverride
+object.oncombatevent    = object.oncombateventOverride
 
 
 --------------------------------------------------------------
@@ -289,20 +289,5 @@ function object:onthinkOverride(tGameVariables)
 end
 object.onthinkOld = object.onthink
 object.onthink = object.onthinkOverride
-
-----------------------------------------------
---            oncombatevent override        --
--- use to check for infilictors (fe. buffs) --
-----------------------------------------------
--- @param: eventdata
--- @return: none
-function object:oncombateventOverride(EventData)
-  self:oncombateventOld(EventData)
-
-  -- custom code here
-end
--- override combat event trigger function.
-object.oncombateventOld = object.oncombatevent
-object.oncombatevent = object.oncombateventOverride
 
 BotEcho('finished loading monkeyking_main')

@@ -1,6 +1,8 @@
 local _G = getfenv(0)
 local object = _G.object
 
+local arrowThrown = 0
+
 object.myName = object:GetName()
 
 object.bRunLogic = true
@@ -18,7 +20,7 @@ object.bReportBehavior = true
 object.bDebugUtility = false
 object.bDebugExecute = false
 
-object.debugArrow = false -- whether to debug arrow targeting
+object.debugArrow = true -- whether to debug arrow targeting
 object.debugCall = false -- whether to debug call of the valkyrie targeting
 
 object.logger = {}
@@ -215,7 +217,7 @@ function object:onthinkOverride(tGameVariables)
   self:onthinkOld(tGameVariables)
 
   local unitTarget = behaviorLib.heroTarget
-  if unitTarget and unitTarget:IsValid() then
+  if unitTarget and unitTarget:IsValid() and core.CanSeeUnit(object, unitTarget) then
     creepsInWay(unitTarget, object.debugArrow)
   end
   countCreepsForCallOfValkyrie(unitTarget, object.debugCall)
@@ -376,7 +378,7 @@ object.harassExecuteOld = behaviorLib.HarassHeroBehavior["Execute"]
 behaviorLib.HarassHeroBehavior["Execute"] = HarassHeroExecuteOverride
 
 local function PreGameExecuteOverride(botBrain)
-    if object.arrowThrown then
+    if arrowThrown >= 20 then
         return object.preGameExecuteOld(botBrain)
     end
 
@@ -401,7 +403,7 @@ local function PreGameExecuteOverride(botBrain)
 
     if core.OrderAbilityPosition(botBrain, skills.arrow, enemyPool) then
         p("Arrow thrown!")
-        object.arrowThrown = true
+        arrowThrown = arrowThrown + 1
     end
 
 end
@@ -425,5 +427,35 @@ behaviorLib.DefensiveUltiBehavior["Execute"] = DefensiveUltiExecute
 behaviorLib.DefensiveUltiBehavior["Utility"] = DefensiveUltiUtility
 behaviorLib.DefensiveUltiBehavior["Name"] = "DefensiveUlti"
 tinsert(behaviorLib.tBehaviors, behaviorLib.DefensiveUltiBehavior)
+
+local function CourierUtility(botBrain)
+    if HoN:GetMatchTime() <= 0 then
+        return 0
+    end
+
+    behaviorLib.foundBird = false
+    for i, unit in pairs(HoN.GetUnitsInRadius(core.unitSelf:GetPosition(), 9999999, 0xff)) do
+        if unit:GetTypeName() == "Pet_AutomatedCourier" and unit:GetTeam() == core.unitSelf:GetTeam() then
+            drawCross(unit:GetPosition(), "red")
+            behaviorLib.foundBird = true
+            break
+        end
+    end
+
+    if not behaviorLib.foundBird and skills.courier:CanActivate() then
+        return 100
+    end
+    return 0
+end
+
+local function CourierExecute(botBrain)
+    return core.OrderAbility(botBrain, skills.courier)
+end
+
+behaviorLib.CourierBehavior = {}
+behaviorLib.CourierBehavior["Execute"] = CourierExecute
+behaviorLib.CourierBehavior["Utility"] = CourierUtility
+behaviorLib.CourierBehavior["Name"] = "Courier"
+tinsert(behaviorLib.tBehaviors, behaviorLib.CourierBehavior)
 
 object.illusionLib.tIllusionBehaviors["NoBehavior"] = object.illusionLib.Push

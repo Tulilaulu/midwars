@@ -3510,7 +3510,17 @@ end
 -------- Behavior Fns --------
 function behaviorLib.ShopUtility(botBrain)
 	--BotEcho('CanAccessStash: '..tostring(core.unitSelf:CanAccessStash()))
-	local bCanAccessShop = core.unitSelf:CanAccessStash()
+	local bCanAccessShop = false
+	if core.unitSelf:CanAccessStash() then
+	    bCanAccessShop = true
+        elseif HoN:GetMatchTime() >= 0 then
+            if behaviorLib.canAccessShopLast and behaviorLib.nextBuyTime < HoN.GetGameTime() then
+                bCanAccessShop = false
+            else
+                bCanAccessShop = true
+            end
+        end
+	-- BotEcho('CanShop: '..tostring(bCanAccessShop) .. " nextBuyTime: " .. tostring(behaviorLib.nextBuyTime) .. " GameTime: " .. tostring(HoN.GetGameTime()))
 
 	--just got into shop access, try buying
 	if bCanAccessShop and not behaviorLib.canAccessShopLast then
@@ -3546,13 +3556,14 @@ Current algorithm:
        3. Homecoming Stone
        4. Most Expensive Item(s) (price decending)
 --]]
+	local ret = HoN:GetMatchTime() <= 0
 	if object.bUseShop == false then
-		return
+		return ret
 	end
 
 	-- Space out your buys
 	if behaviorLib.nextBuyTime > HoN.GetGameTime() then
-		return
+		return ret
 	end
 
 	behaviorLib.nextBuyTime = HoN.GetGameTime() + behaviorLib.buyInterval
@@ -3641,6 +3652,7 @@ Current algorithm:
 		
 		behaviorLib.finishedBuying = true
 	end
+	return ret
 end
 
 

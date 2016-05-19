@@ -21,7 +21,7 @@ behaviorLib.nBehaviorAssessInterval = 250
 local BotEcho, VerboseLog, Clamp = core.BotEcho, core.VerboseLog, core.Clamp
 
 --add the item behaviors into the game, so they can be overloaded.
-runfile "bots/teams/team_name_here/itemBehaviors.lua"
+runfile "bots/teams/retk/itemBehaviors.lua"
 
 
 ---------------------------------------------------

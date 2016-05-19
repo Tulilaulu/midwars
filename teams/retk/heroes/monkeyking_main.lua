@@ -103,24 +103,18 @@ function object:SkillBuild()
   end
   
   --order of leveling
-object.tSkills = {
+  object.tSkills = {
    0, 1, 2, 1, 1,
    3, 2, 2, 0, 0,
    1, 2, 0, 3, 3,
    4, 4, 4, 4, 4,
    4, 4, 4, 4, 4,
-}
- -- if skills.ulti:CanLevelUp() then
---    skills.ulti:LevelUp()
-  --elseif skills.dash:CanLevelUp() then
---    skills.dash:LevelUp()
-  --elseif skills.pole:CanLevelUp() then
---    skills.pole:LevelUp()
-  --elseif skills.rock:CanLevelUp() then
---    skills.rock:LevelUp()
-  --else
---    skills.attributeBoost:LevelUp()
-  --end
+  }
+  local nlev = unitSelf:GetLevel()
+  local nlevpts = unitSelf:GetAbilityPointsAvailable()
+  for i = nlev, nlev+nlevpts do
+    unitSelf:GetAbility( object.tSkills[i] ):LevelUp()
+  end
 end
 
 -- These are bonus agression points if a skill/item is available for use

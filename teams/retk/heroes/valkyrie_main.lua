@@ -67,7 +67,7 @@ core.tLanePreferences = {Jungle = 0, Mid = 5, ShortSolo = 4, LongSolo = 2, Short
 behaviorLib.StartingItems =
 	{"Item_RunesOfTheBlight", "2 Item_MinorTotem", "Item_ManaBattery", "Item_DuckBoots" }
 behaviorLib.LaneItems =
-	{ "Item_PowerSupply", "Item_Marchers", "Item_Soulscream", "Item_Energizer", "Item_GlovesOfHaste", "Item_Steamboots"} -- Items: Marchers,Helm Of The Black Legion, upg Marchers to Plated Greaves
+	{ "Item_PowerSupply", "Item_Marchers", "Item_Soulscream", "Item_GlovesOfHaste", "Item_Steamboots", "Item_MajorTotem", "Item_Energizer" } -- Items: Marchers,Helm Of The Black Legion, upg Marchers to Plated Greaves
 behaviorLib.MidItems =
 	{"Item_MagicArmor2","Item_DaemonicBreastplate", "Item_Strength6"} -- Items: Shaman's Headress, Daemonic Breastplate, Icebrand
 behaviorLib.LateItems =

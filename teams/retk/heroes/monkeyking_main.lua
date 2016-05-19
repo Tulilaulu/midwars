@@ -124,17 +124,17 @@ end
 -- These are bonus agression points if a skill/item is available for use
 object.nDashUp = 10
 object.nPoleUp = 12 
-object.nRockUp = 20
+object.nRockUp = 8
  
 -- These are bonus agression points that are applied to the bot upon successfully using a skill/item
 object.nDashUse = 15
 object.nPoleUse = 20
-object.nRockUse = 22
+object.nRockUse = 12
  
 --These are thresholds of aggression the bot must reach to use these abilities
-object.nDashThreshold = 20
-object.nPoleThreshold = 10
-object.nRockThreshold = 40
+object.nDashThreshold = 15
+object.nPoleThreshold = 16
+object.nRockThreshold = 12
 
 ------------------------------------------------------
 --            CustomHarassUtility Override          --
@@ -258,9 +258,9 @@ local function HarassHeroExecuteOverride(botBrain)
     if core.CanSeeUnit(botBrain, unitTarget) then
         if not bActionTaken then --and bTargetVuln then
             if skills.rock:CanActivate() and nLastHarassUtility > botBrain.nRockThreshold then
-                local nRange = abilBlazing:GetRange()
+                local nRange = 100 -- FIXME
                 if nTargetDistanceSq < (nRange * nRange) then
-                    bActionTaken = core.OrderAbilityEntity(botBrain, skills.rock, unitTarget)
+                    bActionTaken = core.OrderAbility(botBrain, skills.rock)
                 else
                     bActionTaken = core.OrderMoveToUnitClamp(botBrain, unitSelf, unitTarget)
                 end

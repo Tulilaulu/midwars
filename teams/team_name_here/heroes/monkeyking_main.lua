@@ -33,6 +33,7 @@ runfile "bots/teams/team_name_here/botbraincore.lua"
 runfile "bots/eventsLib.lua"
 runfile "bots/metadata.lua"
 runfile "bots/teams/team_name_here/behaviorLib.lua"
+runfile "bots/teams/team_name_here/courier.lua"
 
 local core, eventsLib, behaviorLib, metadata, skills = object.core, object.eventsLib, object.behaviorLib, object.metadata, object.skills
 

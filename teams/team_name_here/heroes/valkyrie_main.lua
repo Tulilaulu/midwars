@@ -39,6 +39,7 @@ runfile "bots/eventsLib.lua"
 runfile "bots/metadata.lua"
 runfile "bots/teams/team_name_here/behaviorLib.lua"
 runfile "bots/teams/team_name_here/utils.lua"
+runfile "bots/teams/team_name_here/courier.lua"
 
 
 local core, eventsLib, behaviorLib, metadata, skills = object.core, object.eventsLib, object.behaviorLib, object.metadata, object.skills
@@ -427,35 +428,3 @@ behaviorLib.DefensiveUltiBehavior["Execute"] = DefensiveUltiExecute
 behaviorLib.DefensiveUltiBehavior["Utility"] = DefensiveUltiUtility
 behaviorLib.DefensiveUltiBehavior["Name"] = "DefensiveUlti"
 tinsert(behaviorLib.tBehaviors, behaviorLib.DefensiveUltiBehavior)
-
-local function CourierUtility(botBrain)
-    if HoN:GetMatchTime() <= 0 then
-        return 0
-    end
-
-    behaviorLib.foundBird = false
-    for i, unit in pairs(HoN.GetUnitsInRadius(core.unitSelf:GetPosition(), 9999999, 0xff)) do
-        if unit:GetTypeName() == "Pet_AutomatedCourier" and unit:GetTeam() == core.unitSelf:GetTeam() then
-            drawCross(unit:GetPosition(), "red")
-            behaviorLib.foundBird = true
-            break
-        end
-    end
-
-    if not behaviorLib.foundBird and skills.courier:CanActivate() then
-        return 100
-    end
-    return 0
-end
-
-local function CourierExecute(botBrain)
-    return core.OrderAbility(botBrain, skills.courier)
-end
-
-behaviorLib.CourierBehavior = {}
-behaviorLib.CourierBehavior["Execute"] = CourierExecute
-behaviorLib.CourierBehavior["Utility"] = CourierUtility
-behaviorLib.CourierBehavior["Name"] = "Courier"
-tinsert(behaviorLib.tBehaviors, behaviorLib.CourierBehavior)
-
-object.illusionLib.tIllusionBehaviors["NoBehavior"] = object.illusionLib.Push

@@ -14,7 +14,7 @@ object.bAttackCommands = true
 object.bAbilityCommands = true
 object.bOtherCommands = true
 
-object.bReportBehavior = false
+object.bReportBehavior = true
 object.bDebugUtility = false
 object.bDebugExecute = false
 
@@ -62,7 +62,7 @@ core.tLanePreferences = {Jungle = 0, Mid = 5, ShortSolo = 0, LongSolo = 0, Short
 behaviorLib.StartingItems =
 	{"Item_LoggersHatchet", "2 Item_MinorTotem", "Item_ManaBattery"}
 behaviorLib.LaneItems =
-	{ "Item_PowerSupply", "Item_Marchers", " Item_Punchdagger", "Item_EnhancedMarchers"} -- Items: power supply, ghost marchers
+	{ "Item_PowerSupply", "Item_Marchers", "Item_Punchdagger", "Item_EnhancedMarchers"} -- Items: power supply, ghost marchers
 behaviorLib.MidItems =
 	{"Item_Manatube", "Item_Lifetube", "Item_Glowstone", "Item_Protect", "Item_GuardianRing", "Item_Ringmail", "Item_SolsBulwark"} -- Items: nullstone, sols bulwark
 behaviorLib.LateItems =
@@ -124,12 +124,12 @@ end
 -- These are bonus agression points if a skill/item is available for use
 object.nDashUp = 10
 object.nPoleUp = 12 
-object.nRockUp = 35
+object.nRockUp = 20
  
 -- These are bonus agression points that are applied to the bot upon successfully using a skill/item
-object.nDashUse = 30
-object.nPoleUse = 40
-object.nRockUse = 45
+object.nDashUse = 15
+object.nPoleUse = 20
+object.nRockUse = 22
  
 --These are thresholds of aggression the bot must reach to use these abilities
 object.nDashThreshold = 20
@@ -155,6 +155,11 @@ local function CustomHarassUtilityFnOverride(hero)
  
     if skills.rock:CanActivate() then
         nUtil = nUtil + object.nRockUp
+    end
+    local mp = core.unitSelf:GetManaPercent()
+    local manaThresh = 0.7
+    if mp > manaThresh then
+        nUtil = nUtil + (mp - manaThresh) * 20
     end
     return nUtil
 end

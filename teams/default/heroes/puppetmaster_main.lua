@@ -125,10 +125,10 @@ function object:oncombateventOverride(EventData)
   local addBonus = 0
   
   if EventData.Type == "Ability" then
-    if EventData.InflictorName == "State_PuppetMaster_Ability1" and EventData.SourceUnit == core.unitSelf:GetUniqueID() then
-      addBonus = addBonus + 20
-    elseif EventData.InflictorName == "State_PuppetMaster_Ability2" and EventData.SourceUnit == core.unitSelf:GetUniqueID() then
-      addBonus = addBonus + 20
+    if EventData.InflictorName == "Ability_PuppetMaster1" and EventData.SourceUnit:GetUniqueID() == core.unitSelf:GetUniqueID() then
+      addBonus = addBonus + 30
+    elseif EventData.InflictorName == "Ability_PuppetMaster2" and EventData.SourceUnit:GetUniqueID() == core.unitSelf:GetUniqueID() then
+      addBonus = addBonus + 30
     end
   end
 

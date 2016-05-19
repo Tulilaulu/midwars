@@ -1472,6 +1472,10 @@ behaviorLib.tThreatMultipliers = {}
 behaviorLib.nThreatAdjustment = 0.075
 
 function behaviorLib.GetThreat(unit)
+        if unit:GetTypeName() == "Pet_PuppetMaster_Ability4" then
+            return 0
+        end
+
 	local nThreat = core.teamBotBrain:GetThreat(unit)
 	--apply out threat multiplier
 	return nThreat * (behaviorLib.tThreatMultipliers[unit:GetUniqueID()] or 1)

@@ -645,6 +645,14 @@ function core.AssessLocalUnits(botBrain, vecPosition, nRadius)
 			tEnemyUnits[nUID] = tEnemyHeroes[nUID]
 			tEnemies[nUID] = tEnemyHeroes[nUID]
 		end	
+
+		for nUID,unitEnemy in pairs(tEnemies) do
+		    if unitEnemy:GetTypeName() == "Pet_PuppetMaster_Ability4" then
+			tEnemyHeroes[nUID] = teamBotBrain:CreateMemoryUnit(unitEnemy)
+			tEnemyUnits[nUID] = tEnemyHeroes[nUID]
+			tEnemies[nUID] = tEnemyHeroes[nUID]
+                    end
+		end	
 	StopProfile()
 		
 	StopProfile()

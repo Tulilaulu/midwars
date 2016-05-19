@@ -36,6 +36,7 @@ runfile "bots/teams/team_name_here/botbraincore.lua"
 runfile "bots/eventsLib.lua"
 runfile "bots/metadata.lua"
 runfile "bots/teams/team_name_here/behaviorLib.lua"
+runfile "bots/teams/team_name_here/utils.lua"
 
 
 local core, eventsLib, behaviorLib, metadata, skills = object.core, object.eventsLib, object.behaviorLib, object.metadata, object.skills
@@ -339,14 +340,14 @@ local function HarassHeroExecuteOverride(botBrain)
         leapHealthPercent = 0.50
     end
 
-    if skills.leap:CanActivate() and (unitTarget:GetHealthPercent() < leapHealthPercent) then
+    if bCanSeeUnit and skills.leap:CanActivate() and (unitTarget:GetHealthPercent() < leapHealthPercent) then
         if math.sqrt(nTargetDistanceSqAfterLeap) < 0.8 * math.sqrt(nTargetDistanceSq) then
             bActionTaken = core.OrderAbility(botBrain, skills.leap)
         end
     end
 
     --Arrow
-    if not bActionTaken and not creepsInWay(unitTarget, false) and abilArrow:CanActivate() and nLastHarassUtility >= object.nArrowThreshold then
+    if bCanSeeUnit and not bActionTaken and not creepsInWay(unitTarget, false) and abilArrow:CanActivate() and nLastHarassUtility >= object.nArrowThreshold then
         local nRange = abilArrow:GetRange()
         if nTargetDistanceSq < (nRange * nRange) then
             if nLastHarassUtility > object.nArrowThreshold then
@@ -357,7 +358,7 @@ local function HarassHeroExecuteOverride(botBrain)
 
     --Call of the Valkyrie
     local numCallTargets = countCreepsForCallOfValkyrie(unitTarget, false)
-    if not bActionTaken and abilCall:CanActivate() and nLastHarassUtility >= object.nCallThreshold then
+    if bCanSeeUnit and not bActionTaken and abilCall:CanActivate() and nLastHarassUtility >= object.nCallThreshold then
         local nRange = 180
         if nTargetDistanceSq < (nRange * nRange) or numCallTargets >= 2 then
             bActionTaken = core.OrderAbility(botBrain, abilCall)

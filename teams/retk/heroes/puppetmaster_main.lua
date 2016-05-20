@@ -193,13 +193,13 @@ function object:oncombateventOverride(EventData)
     local addBonus = 0
     p(EventData)
     if EventData.InflictorName == "Ability_PuppetMaster1" and EventData.SourcePlayerName == "RETK_PuppetMasterBot" then
-        core.AllChat("Used hold successfully")
+        -- core.AllChat("Used hold successfully")
         addBonus = addBonus + object.nHoldUse
     elseif EventData.InflictorName == "Ability_PuppetMaster2" and EventData.SourcePlayerName == "RETK_PuppetMasterBot" then
-        core.AllChat("Used show successfully")
+        -- core.AllChat("Used show successfully")
         addBonus = addBonus + object.nShowUse
     elseif EventData.InflictorName == "Ability_PuppetMaster4" and EventData.SourcePlayerName == "RETK_PuppetMasterBot" then
-        core.AllChat("Used ulti successfully")
+        -- core.AllChat("Used ulti successfully")
         addBonus = addBonus + object.nUltiUse
     end
 
@@ -241,7 +241,7 @@ local function CustomHarassUtilityFnOverride(hero)
     end
 
     if unitTarget:GetTypeName() == "Pet_PuppetMaster_Ability4" then
-        p("Targeted puppet ult")
+        -- p("Targeted puppet ult")
         utility = utility + 50
     end
 
@@ -251,7 +251,7 @@ local function CustomHarassUtilityFnOverride(hero)
         utility = utility + (mp - manaThresh) * 20
     end
 
-    p("Harass utility: " .. tostring(utility))
+    -- p("Harass utility: " .. tostring(utility))
     return utility
 end
 behaviorLib.CustomHarassUtility = CustomHarassUtilityFnOverride
@@ -259,7 +259,7 @@ behaviorLib.CustomHarassUtility = CustomHarassUtilityFnOverride
 local function HarassHeroExecuteOverride(botBrain)
     local unitTarget = behaviorLib.heroTarget
     if not unitTarget or not unitTarget:IsValid() or not bSkillsValid then
-        p("Can't harass :(")
+        -- p("Can't harass :(")
         return false --can not execute, move on to the next behavior
     end
 
@@ -286,7 +286,7 @@ local function HarassHeroExecuteOverride(botBrain)
         if abilTaunt:CanActivate() then
             local nRange = 1200
             if nTargetDistanceSq < (nRange * nRange) then
-                p("using taunt")
+                -- p("using taunt")
                 bActionTaken = core.OrderAbilityEntity(botBrain, abilTaunt, unitTarget)
             end
         end

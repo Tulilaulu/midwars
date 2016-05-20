@@ -18,6 +18,8 @@ object.bReportBehavior = false
 object.bDebugUtility = false
 object.bDebugExecute = false
 
+object.debugPuppetShowCreeps = false
+
 object.logger = {}
 object.logger.bWriteLog = false
 object.logger.bVerboseLog = false
@@ -172,7 +174,7 @@ function object:onthinkOverride(tGameVariables)
 
     local unitTarget = behaviorLib.heroTarget
     if unitTarget and unitTarget:IsValid() then
-        creepsNearbyForPuppetShow(unitTarget, true)
+        creepsNearbyForPuppetShow(unitTarget, object.debugPuppetShowCreeps)
     end
     --for _, e in pairs(core.localUnits["Enemies"]) do
     --    p(e:GetTypeName())
@@ -191,7 +193,7 @@ object.onthink = object.onthinkOverride
 function object:oncombateventOverride(EventData)
     self:oncombateventOld(EventData)
     local addBonus = 0
-    p(EventData)
+    -- p(EventData)
     if EventData.InflictorName == "Ability_PuppetMaster1" and EventData.SourcePlayerName == "RETK_PuppetMasterBot" then
         -- core.AllChat("Used hold successfully")
         addBonus = addBonus + object.nHoldUse

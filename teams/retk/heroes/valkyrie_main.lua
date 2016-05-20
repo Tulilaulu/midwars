@@ -419,6 +419,26 @@ local function DefensiveUltiUtility(botBrain)
     return 0
 end
 
+function behaviorLib.CustomReturnToWellExecute(botBrain)
+    if not skills.leap:CanActivate() then
+        return false
+    end
+    local startPos = core.unitSelf:GetPosition()
+    local endPos = core.allyMainBaseStructure:GetPosition()
+    local dist = Vector3.Distance2D(startPos, endPos)
+    local angle = core.HeadingDifference(core.unitSelf, endPos) * 180.0 / math.pi
+
+    -- drawLine(startPos, endPos)
+    --BotEcho(tostring(dist))
+    --BotEcho(tostring(angle))
+
+    if dist >= 2300 or dist <= 700 or angle > 16 or angle < -16 then
+        return
+    end
+
+    return core.OrderAbility(botBrain, skills.leap)
+end
+
 local function DefensiveUltiExecute(botBrain)
     return core.OrderAbility(botBrain, skills.ulti)
 end

@@ -119,7 +119,7 @@ function object:SkillBuild()
 end
 
 -- utility agression points if a skill/item is available for use
-object.nArrowUp = 15
+object.nArrowUp = 30
 object.nCallUp = 10
 object.nStunUtil = 10 -- extra aggression if target stunned
 
@@ -131,27 +131,41 @@ object.nArrowUse = 20
 object.nArrowThreshold = 17
 object.nCallThreshold = 10
 
+local function To2D(vec)
+    return Vector3.Create(vec.x, vec.y, 0)
+end
+
 local function creepsInWay(unitTarget, drawLines)
-    local selfPos = core.unitSelf:GetPosition()
-    local targetPos = unitTarget:GetPosition()
-    local diff = Vector3.Distance(targetPos, selfPos)
+    local selfPos = To2D(core.unitSelf:GetPosition())
+    local targetPos = To2D(unitTarget:GetPosition())
+    local distanceToTarget = Vector3.Distance(targetPos, selfPos)
+    local sub = Vector3.Normalize(targetPos - selfPos)
+    local ortho = Vector3.Create(-sub.y, sub.x)
 
     if drawLines then drawLine(selfPos, targetPos, "red") end
 
     local ok = true
     for i, creep in pairs(core.localUnits["EnemyCreeps"]) do
         local name = creep:GetTypeName()
-        local creepPos = creep:GetPosition()
-        local d = Vector3.Length(Vector3.Cross(creepPos - selfPos, creepPos - targetPos)) / diff
+        local creepPos = To2D(creep:GetPosition())
+        local d = Vector3.Length(Vector3.Cross(creepPos - selfPos, creepPos - targetPos)) / distanceToTarget
+
+        local projectedPos = creepPos + d * ortho
+        local projectedDistToSelf = Vector3.Distance(selfPos, projectedPos)
+        local projectedDistToTarget = Vector3.Distance(targetPos, projectedPos)
+
         local color
-        -- p(d)
-        if d > 120 or (name == "Creep_LegionSiege" or name == "Creep_HellbourneSiege") then
+        local isSiege = name == "Creep_LegionSiege" or name == "Creep_HellbourneSiege"
+        if d > 120 or isSiege or projectedDistToSelf > distanceToTarget or projectedDistToTarget > distanceToTarget then
             color = "green"
         else
             color ="red"
             ok = false
         end
-        if drawLines then drawCross(creep:GetPosition(), color) end
+        if drawLines then drawCross(creepPos, color) end
+
+        -- if drawLines then drawCross(projected, "yellow") end
+        -- if drawLines then drawLine(creepPos, projected, color) end
     end
 
     if ok then
@@ -215,13 +229,14 @@ end
 -- @param: tGameVariables
 -- @return: none
 function object:onthinkOverride(tGameVariables)
-  self:onthinkOld(tGameVariables)
+    self:onthinkOld(tGameVariables)
 
-  local unitTarget = behaviorLib.heroTarget
-  if unitTarget and unitTarget:IsValid() and core.CanSeeUnit(object, unitTarget) then
-    creepsInWay(unitTarget, object.debugArrow)
-  end
-  countCreepsForCallOfValkyrie(unitTarget, object.debugCall)
+    local unitTarget = behaviorLib.heroTarget
+    if unitTarget and unitTarget:IsValid() and core.CanSeeUnit(object, unitTarget) then
+        creepsInWay(unitTarget, object.debugArrow)
+    end
+    countCreepsForCallOfValkyrie(unitTarget, object.debugCall)
+
 
   -- custom code here
 end
@@ -432,7 +447,7 @@ function behaviorLib.CustomReturnToWellExecute(botBrain)
     --BotEcho(tostring(dist))
     --BotEcho(tostring(angle))
 
-    if dist >= 2300 or dist <= 700 or angle > 16 or angle < -16 then
+    if dist >= 2500 or dist <= 700 or angle > 16 or angle < -16 then
         return
     end
 

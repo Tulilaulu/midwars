@@ -286,6 +286,24 @@ local function CustomHarassUtilityFnOverride(hero)
     if not unitTarget or not unitTarget:IsValid() or not bSkillsValid then
         return 0 --can not execute, move on to the next behavior
     end
+    local myPos = core.unitSelf:GetPosition()
+    local targetPos = unitTarget:GetPosition()
+
+    -- local poolDivin = false
+    -- if core.myTeam == HoN.GetHellbourneTeam() then
+    -- else
+    --     local xlim = 8000
+    --     local ylim = 11250
+    --     drawLine(Vector3.Create(xlim, 99999), Vector3.Create(xlim, ylim))
+    --     drawLine(Vector3.Create(xlim, ylim), Vector3.Create(99999, ylim))
+    --     poolDivin = (targetPos.x > xlim and targetPos.y > ylim) or (myPos.x > xlim and myPos.y > ylim)
+    -- end
+
+    -- if poolDivin then
+    --     p("Not pool diving!")
+    --     return -500
+    -- end
+
     local bTargetRooted = unitTarget:IsStunned() or unitTarget:IsImmobilized() or unitTarget:GetMoveSpeed() < 200
 
     local utility = 0

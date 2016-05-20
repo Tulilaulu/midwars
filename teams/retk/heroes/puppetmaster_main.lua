@@ -321,7 +321,7 @@ local function HarassHeroExecuteOverride(botBrain)
         local nRange = skills.hold:GetRange()
         -- p("hold range is: " .. tostring(nRange))
         if nTargetDistanceSq < (nRange * nRange)  then
-            core.AllChat("using hold")
+            -- core.AllChat("using hold")
             bActionTaken = core.OrderAbilityEntity(botBrain, skills.hold, unitTarget)
         end
     end

@@ -294,6 +294,26 @@ local function DetermineHookTarget(hook)
   return unitTarget
 end
 
+local function DetermineUltiTarget(ulti)
+  local tLocalEnemies = core.CopyTable(core.localUnits["EnemyHeroes"])
+  local maxDistance = ulti:GetRange()
+  local maxDistanceSq = maxDistance * maxDistance
+  local myPos = core.unitSelf:GetPosition()
+  local unitTarget = nil
+  local distanceTarget = 999999999
+  for _, unitEnemy in pairs(tLocalEnemies) do
+    local enemyPos = unitEnemy:GetPosition()
+    local distanceEnemy = Vector3.Distance2DSq(myPos, enemyPos)
+    if distanceEnemy < maxDistanceSq then
+      if distanceEnemy < distanceTarget and not creepsInWay(unitEnemy, false) then
+        unitTarget = unitEnemy
+        distanceTarget = distanceEnemy
+      end
+    end
+  end
+  return unitTarget
+end
+
 local hookTarget = nil
 local function HookUtility(botBrain)
   local hook = skills.hook
@@ -347,13 +367,25 @@ local function HowManyEnemyCreepsInRange(unit, range)
   end
   return creeps
 end
+local ultiTarget = nil
 local function RotEnableUtility(botBrain)
   local rot = skills.rot
+  local ulti = skills.ulti
   local rotRange = rot:GetTargetRadius()
+  local ultiRange = ulti:GetTargetRadius()
   local hasEffect = core.unitSelf:HasState("State_Devourer_Ability2_Self")
   local hasEnemyHeroesClose = HasEnemyHeroesInRange(core.unitSelf, rotRange)
+  local hasEnemyHeroesUltiRange = HasEnemyHeroesInRange(core.unitSelf, ultiRange)
   local hasEnemyCreepsClose = HowManyEnemyCreepsInRange(core.unitSelf, rotRange)
+  if ulti and ulti:CanActivate() then
+    ultiTarget = DetermineUltiTarget(ulti)
+  end
   local rotting = 0
+  if ulti:CanActivate() and not core.unitSelf:IsChanneling() and ultiTarget then
+    if hasEnemyHeroesUltiRang then
+      rotting = rotting + 50
+    end
+  end
   if rot:CanActivate() and not hasEffect then
     if hasEnemyHeroesClose then
       rotting = rotting + 50
@@ -362,6 +394,9 @@ local function RotEnableUtility(botBrain)
       rotting = rotting + 50
     end
     rotting = rotting * core.unitSelf:GetHealthPercent() 
+    if core.unitSelf:IsChanneling()  then
+      rotting = rotting + 100
+    end
   end
   return rotting
   
@@ -370,6 +405,11 @@ local function RotEnableExecute(botBrain)
   local rot = skills.rot
   if rot and rot:CanActivate() then
     return core.OrderAbility(botBrain, rot)
+  end
+  local ulti = skills.ulti
+  if ulti and ulti:CanActivate() then
+    ultiTarget = DetermineUltiTarget(ulti)
+    core.OrderAbilityEntity(botBrain, ulti, ultiTarget)
   end
   return false
 end

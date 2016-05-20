@@ -299,7 +299,7 @@ local function HarassHeroExecuteOverride(botBrain)
         local nRange = skills.ulti:GetRange()
         -- p("ulti range is: " .. tostring(nRange))
         if nTargetDistanceSq < (nRange * nRange)  then
-            core.AllChat("using ult")
+            -- core.AllChat("using ult")
             bActionTaken = core.OrderAbilityEntity(botBrain, skills.ulti, unitTarget)
         end
     end
@@ -310,7 +310,7 @@ local function HarassHeroExecuteOverride(botBrain)
         -- p("show range is: " .. tostring(nRange))
         if nTargetDistanceSq < (nRange * nRange) then
             if nLastHarassUtility > object.nShowThreshold then
-                core.AllChat("using show")
+                -- core.AllChat("using show")
                 bActionTaken = core.OrderAbilityEntity(botBrain, skills.show, unitTarget)
             end
         end

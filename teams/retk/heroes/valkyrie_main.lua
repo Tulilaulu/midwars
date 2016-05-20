@@ -16,11 +16,11 @@ object.bAttackCommands = true
 object.bAbilityCommands = true
 object.bOtherCommands = true
 
-object.bReportBehavior = true
+object.bReportBehavior = false
 object.bDebugUtility = false
 object.bDebugExecute = false
 
-object.debugArrow = true -- whether to debug arrow targeting
+object.debugArrow = false -- whether to debug arrow targeting
 object.debugCall = false -- whether to debug call of the valkyrie targeting
 
 object.logger = {}
@@ -262,7 +262,7 @@ function object:oncombateventOverride(EventData)
         end
         addBonus = object.nArrowUse
     elseif EventData.InflictorName == "Ability_Valkyrie1" and EventData.SourcePlayerName == "RETK_ValkyrieBot" then
-        p("Used call of valkyrie")
+        -- p("Used call of valkyrie")
         addBonus = object.nCallUse
     end
 
@@ -398,7 +398,7 @@ local function HarassHeroExecuteOverride(botBrain)
         local nRange = 180
         if nTargetDistanceSq < (nRange * nRange) or numCallTargets >= 2 then
             bActionTaken = core.OrderAbility(botBrain, abilCall)
-            p("Doing call of valkyrie, hero dist: " .. tostring(math.sqrt(nTargetDistanceSq)) .. " creeps: " .. tostring(numCallTargets))
+            -- p("Doing call of valkyrie, hero dist: " .. tostring(math.sqrt(nTargetDistanceSq)) .. " creeps: " .. tostring(numCallTargets))
         end
     end
 
@@ -417,26 +417,26 @@ local function PreGameExecuteOverride(botBrain)
     end
 
     if skills.arrow == nil then
-        p("Skill is null :(")
+        -- p("Skill is null :(")
         return object.preGameExecuteOld(botBrain)
     end
 
     if not skills.arrow:CanActivate() then
-        p("Skill is null :(")
+        -- p("Skill is null :(")
         return object.preGameExecuteOld(botBrain)
     end
 
     local enemyPool
     if core.myTeam == HoN.GetHellbourneTeam() then
-        p("I am hellbourne")
+        -- p("I am hellbourne")
         enemyPool = Vector3.Create(3144.3381, 6972.4937, 256.0000)
     else
-        p("I am legion")
+        -- p("I am legion")
         enemyPool = Vector3.Create(8588.3457, 11719.2256, 259.2413)
     end
 
     if core.OrderAbilityPosition(botBrain, skills.arrow, enemyPool) then
-        p("Arrow thrown!")
+        -- p("Arrow thrown!")
         arrowThrown = arrowThrown + 1
     end
 

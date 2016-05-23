@@ -64,6 +64,14 @@ core.tLanePreferences = {Jungle = 0, Mid = 5, ShortSolo = 4, LongSolo = 0, Short
 --------------------------------
 -- Skills
 --------------------------------
+-- Skillbuild table, 0=q, 1=w, 2=e, 3=r, 4=attri
+object.tSkills = {
+  0, 1, 2, 0, 0,
+  3, 0, 1, 1, 1,
+  3, 2, 2, 2, 4,
+  3, 4, 4, 4, 4,
+  4, 4, 4, 4, 4
+}
 local bSkillsValid = false
 function object:SkillBuild()
   local unitSelf = self.core.unitSelf
@@ -82,36 +90,17 @@ function object:SkillBuild()
     end
   end
 
-  if unitSelf:GetAbilityPointsAvailable() <= 0 then
+  local nPoints = unitSelf:GetAbilityPointsAvailable()
+  if nPoints <= 0 then
     return
   end
 
-  if skills.whip:CanLevelUp() then
-    skills.whip:LevelUp()
-  elseif skills.hold:CanLevelUp() then
-    skills.hold:LevelUp()
-  elseif skills.show:CanLevelUp() then
-    skills.show:LevelUp()
-  elseif skills.ulti:CanLevelUp() then
-    skills.ulti:LevelUp()
-  else
-    skills.attributeBoost:LevelUp()
+  local nLevel = unitSelf:GetLevel()
+  for i = nLevel, (nLevel + nPoints) do
+    unitSelf:GetAbility( self.tSkills[i] ):LevelUp()
   end
 end
 
-------------------------------------------------------
---            onthink override                      --
--- Called every bot tick, custom onthink code here  --
-------------------------------------------------------
--- @param: tGameVariables
--- @return: none
-function object:onthinkOverride(tGameVariables)
-  self:onthinkOld(tGameVariables)
-
-  -- custom code here
-end
-object.onthinkOld = object.onthink
-object.onthink = object.onthinkOverride
 
 ----------------------------------------------
 --            oncombatevent override        --
@@ -123,7 +112,7 @@ function object:oncombateventOverride(EventData)
   self:oncombateventOld(EventData)
 
   local addBonus = 0
-  
+
   if EventData.Type == "Ability" then
     if EventData.InflictorName == "Ability_PuppetMaster1" and EventData.SourceUnit:GetUniqueID() == core.unitSelf:GetUniqueID() then
       addBonus = addBonus + 30
@@ -142,7 +131,7 @@ object.oncombatevent = object.oncombateventOverride
 
 local function CustomHarassUtilityFnOverride(target)
   local nUtility = 0
-  
+
   if skills.show:CanActivate() then
     nUtility = nUtility + 10
   end
@@ -160,27 +149,33 @@ local function HarassHeroExecuteOverride(botBrain)
   if unitTarget == nil or not unitTarget:IsValid() then
     return false --can not execute, move on to the next behavior
   end
-  
+
   local unitSelf = core.unitSelf
   local bActionTaken = false
 
   if core.CanSeeUnit(botBrain, unitTarget) then
-  
+
     local nTargetDistanceSq = Vector3.Distance2DSq(unitSelf:GetPosition(), unitTarget:GetPosition())
-    
+
+    local ulti = skills.ulti
+    local nRange = ulti:GetRange()
+    if not unitTarget:IsMagicImmune() and ulti:CanActivate() and nTargetDistanceSq < (nRange * nRange) then
+      bActionTaken = core.OrderAbilityEntity(botBrain, ulti, unitTarget)
+    end
+
     local hold = skills.hold
-    local nRange = hold:GetRange()
-    if hold:CanActivate() and not unitTarget:HasState("State_PuppetMaster_Ability2") and nTargetDistanceSq < (nRange * nRange) then
+    nRange = hold:GetRange()
+    if not bActionTaken and not unitTarget:IsStunned() and not unitTarget:IsMagicImmune() and hold:CanActivate() and not unitTarget:HasState("State_PuppetMaster_Ability2") and nTargetDistanceSq < (nRange * nRange) then
       bActionTaken = core.OrderAbilityEntity(botBrain, hold, unitTarget)
     end
 
     local show = skills.show
     nRange = show:GetRange()
     local unitsNearby = core.AssessLocalUnits(botBrain, unitTarget, 400)
-    
+
     local nEnemies = core.NumberElements(unitsNearby.Enemies)
 
-    if not bActionTaken and not unitTarget:HasState("State_PuppetMaster_Ability1") and show:CanActivate() and nTargetDistanceSq < (nRange * nRange) and nEnemies > 0 then
+    if not bActionTaken and not unitTarget:IsStunned() and not unitTarget:IsMagicImmune() and not unitTarget:HasState("State_PuppetMaster_Ability1") and show:CanActivate() and nTargetDistanceSq < (nRange * nRange) and nEnemies > 0 then
       bActionTaken = core.OrderAbilityEntity(botBrain, show, unitTarget)
     end
   end

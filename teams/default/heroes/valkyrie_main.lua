@@ -65,6 +65,14 @@ core.tLanePreferences = {Jungle = 0, Mid = 5, ShortSolo = 4, LongSolo = 2, Short
 --------------------------------
 -- Skills
 --------------------------------
+-- Skillbuild table, 0=q, 1=w, 2=e, 3=r, 4=attri
+object.tSkills = {
+  1, 2, 0, 0, 0,
+  3, 0, 1, 1, 1,
+  3, 2, 2, 2, 4,
+  3, 4, 4, 4, 4,
+  4, 4, 4, 4, 4
+}
 local bSkillsValid = false
 function object:SkillBuild()
   local unitSelf = self.core.unitSelf
@@ -83,20 +91,14 @@ function object:SkillBuild()
     end
   end
 
-  if unitSelf:GetAbilityPointsAvailable() <= 0 then
+  local nPoints = unitSelf:GetAbilityPointsAvailable()
+  if nPoints <= 0 then
     return
   end
 
-  if skills.ulti:CanLevelUp() then
-    skills.ulti:LevelUp()
-  elseif skills.javelin:CanLevelUp() then
-    skills.javelin:LevelUp()
-  elseif skills.leap:CanLevelUp() then
-    skills.leap:LevelUp()
-  elseif skills.call:CanLevelUp() then
-    skills.call:LevelUp()
-  else
-    skills.attributeBoost:LevelUp()
+  local nLevel = unitSelf:GetLevel()
+  for i = nLevel, (nLevel + nPoints) do
+    unitSelf:GetAbility( self.tSkills[i] ):LevelUp()
   end
 end
 
@@ -123,17 +125,17 @@ object.onthink = object.onthinkOverride
 function object:oncombateventOverride(EventData)
   self:oncombateventOld(EventData)
 
-  local addBonus = 0
   if EventData.Type == "Attack" then
     local unitTarget = EventData.TargetUnit
     if EventData.InflictorName == "Projectile_Valkyrie_Ability2" and unitTarget:IsHero() then
-      addBonus = addBonus + 50
+      local teamBotBrain = core.teamBotBrain
+      if teamBotBrain.SetTeamTarget then
+        teamBotBrain:SetTeamTarget(unitTarget)
+      end
+      core.AllChat("*BOOM* Skill shot!")
     end
   end
 
-  if addBonus > 0 then
-    core.nHarassBonus = core.nHarassBonus + addBonus
-  end
 end
 -- override combat event trigger function.
 object.oncombateventOld = object.oncombatevent
@@ -159,7 +161,7 @@ end
 
 local function CustomHarassUtilityFnOverride(target)
   local nUtility = 0
-  
+
   local call = skills.call
   if call and call:CanActivate() then
     nUtility = nUtility + 10
@@ -195,7 +197,7 @@ behaviorLib.HarassHeroBehavior["Execute"] = HarassHeroExecuteOverride
 
 local PositionSelfLogicOld = behaviorLib.PositionSelfLogic
 local function PositionSelfLogicOverride(botBrain)
-  local vecDesiredPos, unitTarget = PositionSelfLogicOld(botBrain)	
+  local vecDesiredPos, unitTarget = PositionSelfLogicOld(botBrain)
   vecDesiredPos = core.AdjustMovementForTowerLogic(vecDesiredPos)
   return vecDesiredPos, unitTarget
 end
@@ -206,13 +208,22 @@ local function DetermineArrowTarget(arrow)
   local maxDistance = arrow:GetRange()
   local maxDistanceSq = maxDistance * maxDistance
   local myPos = core.unitSelf:GetPosition()
+  local teamBotBrain = core.teamBotBrain
+  if teamBotBrain.GetTeamTarget then
+    local teamTarget = teamBotBrain:GetTeamTarget()
+    if teamTarget then
+      if generics.IsFreeLine(myPos, teamTarget:GetPosition()) then
+        return teamTarget
+      end
+    end
+  end
   local unitTarget = nil
   local distanceTarget = 999999999
   for _, unitEnemy in pairs(tLocalEnemies) do
     local enemyPos = unitEnemy:GetPosition()
     local distanceEnemy = Vector3.Distance2DSq(myPos, enemyPos)
     if distanceEnemy < maxDistanceSq then
-      if distanceEnemy < distanceTarget and generics.IsFreeLine(myPos, enemyPos) then
+      if distanceEnemy < distanceTarget and generics.IsFreeLine(myPos, enemyPos, true) then
         unitTarget = unitEnemy
         distanceTarget = distanceEnemy
       end

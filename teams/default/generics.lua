@@ -15,20 +15,63 @@ local generics = object.generics
 
 BotEcho("loading default generics ..")
 
-function generics.IsFreeLine(pos1, pos2)
+local oncombateventOld = object.oncombatevent
+local function oncombateventCustom(botBrain, EventData)
+  oncombateventOld(botBrain, EventData)
+  local source = EventData.SourceUnit
+  local target = EventData.TargetUnit
+  local teamBotBrain = core.teamBotBrain
+  local unitSelf = core.unitSelf
+  if teamBotBrain and teamBotBrain.SetTeamTarget then
+    if source and source:IsHero() and source:IsAlive() and source:GetTeam() == core.enemyTeam and unitSelf and unitSelf:GetPosition() and source:GetPosition() and Vector3.Distance2D(unitSelf:GetPosition(), source:GetPosition()) < 500 then
+      teamBotBrain:SetTeamTarget(source)
+    end
+    if target and target:IsHero() and target:IsAlive() and target:GetTeam() == core.enemyTeam and unitSelf and unitSelf:GetPosition() and target:GetPosition() and Vector3.Distance2D(unitSelf:GetPosition(), target:GetPosition()) < 500 then
+      teamBotBrain:SetTeamTarget(target)
+    end
+  end
+end
+-- override combat event trigger function.
+
+object.oncombatevent = oncombateventCustom
+
+behaviorLib.nPathEnemyTowerMul = 100
+
+local function PassiveState()
+  local tLane = core.tMyLane
+  if tLane then
+    local creepPos = core.GetFurthestCreepWavePos(tLane, core.bTraverseForward)
+    local enemyBasePos = core.enemyMainBaseStructure:GetPosition()
+    local myTower = core.GetClosestAllyTower(enemyBasePos)
+    local towerPos = myTower:GetPosition()
+    local enemyTower = core.GetClosestEnemyTower(towerPos)
+    local otherTowerPos = enemyTower:GetPosition()
+    local distanceAlly = Vector3.Distance2D(creepPos, towerPos)
+    local distanceEnemy = Vector3.Distance2D(creepPos, otherTowerPos)
+    --BotEcho("DA:"..distanceAlly..";DE:"..distanceEnemy)
+    if (distanceAlly < distanceEnemy and distanceEnemy < 2500) or (distanceAlly > distanceEnemy and distanceAlly < 2500) then
+      return true
+    end
+  end
+  return false
+end
+
+function generics.IsFreeLine(pos1, pos2, ignoreAllies)
   local tAllies = core.CopyTable(core.localUnits["AllyUnits"])
   local tEnemies = core.CopyTable(core.localUnits["EnemyCreeps"])
   local distanceLine = Vector3.Distance2DSq(pos1, pos2)
   local x1, x2, y1, y2 = pos1.x, pos2.x, pos1.y, pos2.y
   local spaceBetween = 50 * 50
-  for _, ally in pairs(tAllies) do
-    local posAlly = ally:GetPosition()
-    local x3, y3 = posAlly.x, posAlly.y
-    local calc = x1*y2 - x2*y1 + x2*y3 - x3*y2 + x3*y1 - x1*y3
-    local calc2 = calc * calc
-    local actual = calc2 / distanceLine
-    if actual < spaceBetween then
-      return false
+  if not ignoreAllies then
+    for _, ally in pairs(tAllies) do
+      local posAlly = ally:GetPosition()
+      local x3, y3 = posAlly.x, posAlly.y
+      local calc = x1*y2 - x2*y1 + x2*y3 - x3*y2 + x3*y1 - x1*y3
+      local calc2 = calc * calc
+      local actual = calc2 / distanceLine
+      if actual < spaceBetween then
+        return false
+      end
     end
   end
   for _, creep in pairs(tEnemies) do
@@ -55,25 +98,25 @@ function generics.CustomHarassUtility(target)
   if unitSelf:GetHealth() > target:GetHealth() then
      nUtil = nUtil + 10
   end
-  
+
   if target:IsChanneling() or target:IsDisarmed() or target:IsImmobilized() or target:IsPerplexed() or target:IsSilenced() or target:IsStunned() or unitSelf:IsStealth() then
     nUtil = nUtil + 50
   end
 
   local unitsNearby = core.AssessLocalUnits(object, myPos,100)
-  
-  
+
+
   if core.NumberElements(unitsNearby.AllyHeroes) == 0 then
-  
+
     if core.GetClosestEnemyTower(myPos, 720) then
       nUtil = nUtil - 100
     end
-    
+
     for id, creep in pairs(unitsNearby.EnemyCreeps) do
       local creepPos = creep:GetPosition()
       if(creep:GetAttackType() == "ranged" or Vector3.Distance2D(myPos, creepPos) < 20) then
         nUtil = nUtil - 20
-      end 
+      end
     end
   end
 
@@ -85,8 +128,8 @@ local function PositionSelfExecuteFix(botBrain)
 	local nCurrentTimeMS = HoN.GetGameTime()
 	local unitSelf = core.unitSelf
 	local vecMyPosition = unitSelf:GetPosition()
-	
-	if core.unitSelf:IsChanneling() then 
+
+	if core.unitSelf:IsChanneling() then
 		return
 	end
 
@@ -105,7 +148,7 @@ end
 behaviorLib.PositionSelfBehavior["Execute"] = PositionSelfExecuteFix
 
 local function PushExecuteFix(botBrain)
-	if core.unitSelf:IsChanneling() then 
+	if core.unitSelf:IsChanneling() then
 		return
 	end
 
@@ -128,19 +171,83 @@ local function PushExecuteFix(botBrain)
 
 		end
 	end
-	
+
 	if bActionTaken == false then
 		local vecDesiredPos = behaviorLib.PositionSelfLogic(botBrain)
 		if vecDesiredPos then
 			bActionTaken = behaviorLib.MoveExecute(botBrain, vecDesiredPos)
-			
+
 		end
 	end
-	
+
 	if bActionTaken == false then
 		return false
 	end
 end
 behaviorLib.PushBehavior["Execute"] = PushExecuteFix
+
+
+local HarassHeroUtilityOld = behaviorLib.HarassHeroBehavior["Utility"]
+local function TeamHarassHeroUtility(botBrain)
+  local teamBotBrain = core.teamBotBrain
+  if teamBotBrain.GetTeamTarget then
+    local target = teamBotBrain:GetTeamTarget()
+    if target then
+      local util = 40
+      util = util + behaviorLib.CustomHarassUtility(target)
+      behaviorLib.lastHarassUtil = util
+      behaviorLib.heroTarget = target
+      return util
+    end
+  end
+  if PassiveState() then
+    return 0
+  end
+  return HarassHeroUtilityOld(botBrain)
+end
+behaviorLib.HarassHeroBehavior["Utility"] = TeamHarassHeroUtility
+
+local ProcessKillOld = behaviorLib.ProcessKill
+local function ProcessKillOverride(unit)
+  ProcessKillOld(unit)
+  local teamBotBrain = core.teamBotBrain
+  if teamBotBrain.GetTeamTarget then
+    teamBotBrain:SetTeamTarget(nil)
+  end
+end
+behaviorLib.ProcessKill = ProcessKillOverride
+
+local function FurthestPositionEarlyAdjust(position)
+  if PassiveState() then
+    local enemyBasePos = core.enemyMainBaseStructure:GetPosition()
+    local myTower = core.GetClosestAllyTower(enemyBasePos)
+    local towerPos = myTower:GetPosition()
+    local offset = Vector3.Normalize(enemyBasePos - towerPos) * 1000
+    local middlePos = towerPos + offset
+    local vector = middlePos - towerPos
+    local pos1 = towerPos + core.RotateVec2D(vector, -45)
+    local pos2 = towerPos + core.RotateVec2D(vector, 45)
+    local wantedVec = pos1 - pos2
+    local wantedPos = pos2 + wantedVec * core.RandomReal()
+    return wantedPos
+  end
+  return position
+end
+
+local PositionSelfLogicOld = behaviorLib.PositionSelfLogic
+local function PositionSelfLogicOverride(botBrain)
+  return FurthestPositionEarlyAdjust(PositionSelfLogicOld(botBrain))
+end
+behaviorLib.PositionSelfLogic = PositionSelfLogicOverride
+
+
+local ReturnToPoolOld = behaviorLib.HealAtWellBehavior["Utility"]
+local function ReturnToPool(botBrain)
+  if core.unitSelf:GetHealthPercent() < 20 then
+    return ReturnToPoolOld(botBrain)
+  end
+  return 0
+end
+behaviorLib.HealAtWellBehavior["Utility"] = ReturnToPool
 
 BotEcho("default generics done.")

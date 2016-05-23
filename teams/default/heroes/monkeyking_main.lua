@@ -64,6 +64,14 @@ core.tLanePreferences = {Jungle = 0, Mid = 5, ShortSolo = 0, LongSolo = 0, Short
 --------------------------------
 -- Skills
 --------------------------------
+-- Skillbuild table, 0=q, 1=w, 2=e, 3=r, 4=attri
+object.tSkills = {
+  0, 1, 2, 0, 0,
+  3, 0, 2, 2, 2,
+  3, 1, 1, 1, 4,
+  3, 4, 4, 4, 4,
+  4, 4, 4, 4, 4
+}
 local bSkillsValid = false
 function object:SkillBuild()
   local unitSelf = self.core.unitSelf
@@ -82,20 +90,14 @@ function object:SkillBuild()
     end
   end
 
-  if unitSelf:GetAbilityPointsAvailable() <= 0 then
+  local nPoints = unitSelf:GetAbilityPointsAvailable()
+  if nPoints <= 0 then
     return
   end
 
-  if skills.ulti:CanLevelUp() then
-    skills.ulti:LevelUp()
-  elseif skills.dash:CanLevelUp() then
-    skills.dash:LevelUp()
-  elseif skills.pole:CanLevelUp() then
-    skills.pole:LevelUp()
-  elseif skills.rock:CanLevelUp() then
-    skills.rock:LevelUp()
-  else
-    skills.attributeBoost:LevelUp()
+  local nLevel = unitSelf:GetLevel()
+  for i = nLevel, (nLevel + nPoints) do
+    unitSelf:GetAbility( self.tSkills[i] ):LevelUp()
   end
 end
 
@@ -118,13 +120,11 @@ local function HarassHeroExecuteOverride(botBrain)
     local facing = core.HeadingDifference(unitSelf, unitTarget:GetPosition())
 
     if dash and dash:CanActivate() and Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition()) < dash:GetRange() and facing < 0.3 then
-
       bActionTaken = core.OrderAbility(botBrain, dash)
     end
 
     local stun = skills.rock
-    if not bActionTaken and stun and stun:CanActivate() and Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition()) < 200 and facing < 0.3 then
-
+    if not bActionTaken and not unitTarget:IsStunned() and not unitTarget:IsMagicImmune() and stun and stun:CanActivate() and Vector3.Distance2D(unitSelf:GetPosition(), unitTarget:GetPosition()) < 200 and facing < 0.3 then
       bActionTaken = core.OrderAbility(botBrain, stun)
     end
 
@@ -136,34 +136,6 @@ local function HarassHeroExecuteOverride(botBrain)
 end
 object.harassExecuteOld = behaviorLib.HarassHeroBehavior["Execute"]
 behaviorLib.HarassHeroBehavior["Execute"] = HarassHeroExecuteOverride
-------------------------------------------------------
---            onthink override                      --
--- Called every bot tick, custom onthink code here  --
-------------------------------------------------------
--- @param: tGameVariables
--- @return: none
-function object:onthinkOverride(tGameVariables)
-  self:onthinkOld(tGameVariables)
-
-  -- custom code here
-end
-object.onthinkOld = object.onthink
-object.onthink = object.onthinkOverride
-
-----------------------------------------------
---            oncombatevent override        --
--- use to check for infilictors (fe. buffs) --
-----------------------------------------------
--- @param: eventdata
--- @return: none
-function object:oncombateventOverride(EventData)
-  self:oncombateventOld(EventData)
-
-  -- custom code here
-end
--- override combat event trigger function.
-object.oncombateventOld = object.oncombatevent
-object.oncombatevent = object.oncombateventOverride
 
 local function PoleTarget(botBrain)
   local pole = skills.pole
@@ -173,21 +145,19 @@ local function PoleTarget(botBrain)
   local mainPos = core.allyMainBaseStructure:GetPosition()
   local unitsNearby = core.AssessLocalUnits(botBrain, myPos, pole:GetRange())
   local fromMain = Vector3.Distance2DSq(myPos, mainPos)
-    --jos ei omia creeppejä 500 rangella, niin ei aggroa
     for id, obj in pairs(unitsNearby.Allies) do
     local fromMainObj = Vector3.Distance2DSq(mainPos, obj:GetPosition())
     if(fromMainObj < fromMain and fromMainObj > distance and Vector3.Distance2D(myPos, obj:GetPosition()) > 150) then
       distance = fromMainObj
       target = obj
-    end 
+    end
   end
-
   return target
 end
 function behaviorLib.CustomRetreatExecute(botBrain)
   local pole = skills.pole
   local target = PoleTarget(botBrain)
-  if core.unitSelf:GetHealthPercent() < 0.40 and pole and pole:CanActivate() and target then
+  if core.unitSelf:GetHealthPercent() < 0.40 and pole and pole:CanActivate() and target and Vector3.Distance2D(target:GetPosition(), core.allyWell:GetPosition()) > 2000 then
     return core.OrderAbilityEntity(botBrain, pole, target)
   end
   return false

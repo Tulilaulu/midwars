@@ -97,32 +97,29 @@ behaviorLib.LaneItems = {"Item_Marchers", "Item_EnhancedMarchers", "Item_PowerSu
 behaviorLib.MidItems = {"Item_PortalKey", "Item_MagicArmor2"}
 behaviorLib.LateItems = {"Item_BehemothsHeart"}
 
-------------------------------------------------------
---            onthink override                      --
--- Called every bot tick, custom onthink code here  --
-------------------------------------------------------
--- @param: tGameVariables
--- @return: none
-function object:onthinkOverride(tGameVariables)
-  self:onthinkOld(tGameVariables)
 
-  -- custom code here
-end
-object.onthinkOld = object.onthink
-object.onthink = object.onthinkOverride
-
-----------------------------------------------
---            oncombatevent override        --
--- use to check for infilictors (fe. buffs) --
-----------------------------------------------
--- @param: eventdata
--- @return: none
+local unitHooked = nil
 function object:oncombateventOverride(EventData)
   self:oncombateventOld(EventData)
 
-  -- custom code here
+  if EventData.InflictorName == "Projectile_Devourer_Ability1" and EventData.SourceUnit:GetUniqueID() == core.unitSelf:GetUniqueID() then
+    if EventData.Type == "Attack" then
+      local victim = EventData.TargetUnit
+      if victim:IsHero() then
+        core.AllChat("YOU'RE MINE!")
+        unitHooked = victim
+      end
+    elseif EventData.Type == "Projectile_Target" and EventData.TargetUnit:GetUniqueID() == core.unitSelf:GetUniqueID() then
+      if unitHooked then
+        local teamBotBrain = core.teamBotBrain
+        if teamBotBrain.SetTeamTarget then
+          teamBotBrain:SetTeamTarget(unitHooked)
+        end
+      end
+      unitHooked = nil
+    end
+  end
 end
--- override combat event trigger function.
 object.oncombateventOld = object.oncombatevent
 object.oncombatevent = object.oncombateventOverride
 
@@ -226,6 +223,15 @@ local function DetermineHookTarget(hook)
   local maxDistance = hook:GetRange()
   local maxDistanceSq = maxDistance * maxDistance
   local myPos = core.unitSelf:GetPosition()
+  local teamBotBrain = core.teamBotBrain
+  if teamBotBrain.GetTeamTarget then
+    local teamTarget = teamBotBrain:GetTeamTarget()
+    if teamTarget then
+      if generics.IsFreeLine(myPos, teamTarget:GetPosition()) then
+        return teamTarget
+      end
+    end
+  end
   local unitTarget = nil
   local distanceTarget = 999999999
   for _, unitEnemy in pairs(tLocalEnemies) do
@@ -273,7 +279,7 @@ local function HasEnemiesInRange(unit, range)
   local rangeSq = range * range
   local myPos = unit:GetPosition()
   for _, enemy in pairs(enemies) do
-    if Vector3.Distance2DSq(enemy:GetPosition(), myPos) < rangeSq then
+    if not enemy:IsMagicImmune() and Vector3.Distance2DSq(enemy:GetPosition(), myPos) < rangeSq then
       return true
     end
   end

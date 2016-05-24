@@ -105,6 +105,30 @@ object.nHealLastCastTime = -20000
 -- misc --
 behaviorLib.bTPWithNymph = false -- Don't try to tp with yourself
 
+local function TowerDenyUtility(botBrain)
+  	for _, tower in pairs(core.localUnits["AllyTowers"]) do
+		if tower:GetHealthPercent() < 0.005 then
+			return 100
+		end	
+		if tower:GetHealthPercent() < 0.01 then
+			return 85
+		end
+		if tower:GetHealthPercent() < 0.03 then
+			return 65
+		end
+	end
+end
+
+function TowerDeny()
+	core.OrderAttack(botBrain, object, tower, false)
+end
+
+local TowerDenyBehavior = {}
+TowerDenyBehavior["Utility"] = TowerDenyUtility
+TowerDenyBehavior["Execute"] = TowerDeny
+TowerDenyBehavior["Name"] = "TowerDeny"
+tinsert(behaviorLib.tBehaviors, TowerDenyBehavior)
+
 local function AbilitiesUpUtility(hero)
 	local nUtility = 0
 	
@@ -131,6 +155,7 @@ end
 
 function object:oncombateventOverride(EventData)
 	self:oncombateventOld(EventData)
+
 
 	local nAddBonus = 0
 	
@@ -272,6 +297,7 @@ behaviorLib.SupportBehavior["Utility"] = behaviorLib.SupportUtility
 behaviorLib.SupportBehavior["Execute"] = behaviorLib.SupportExecute
 behaviorLib.SupportBehavior["Name"] = "Nymphora supprot"
 tinsert(behaviorLib.tBehaviors, behaviorLib.SupportBehavior)
+
 
 ------------------------
 --CustomHarassUtility
@@ -436,8 +462,9 @@ function behaviorLib.getHealedUtility(botBrain)
 		local teammembers = core.localUnits["AllyHeroes"]
 		local isTeamLowHealth = false
 		for _, hero in pairs(teammembers) do
-			if hero.GetHealthPercent < 0.7
+			if hero.GetHealthPercent() < 0.7 then
 				isTeamLowHealth = true
+			end
 		end
 	--	p(teammembers)	
 		if unitSelf:GetHealthPercent() < 0.7 or isTeamLowHealth then

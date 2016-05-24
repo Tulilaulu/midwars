@@ -54,6 +54,11 @@ function object:IsPoolDiving()
 
     local poolDivin = false
     if core.myTeam == HoN.GetHellbourneTeam() then
+        local xlim = 4156
+        local ylim = 7064
+        drawLine(Vector3.Create(xlim, 0), Vector3.Create(xlim, ylim))
+        drawLine(Vector3.Create(xlim, ylim), Vector3.Create(0, ylim))
+        poolDivin = (targetPos.x < xlim and targetPos.y < ylim) or (myPos.x < xlim and myPos.y < ylim)
     else
         local xlim = 8000
         local ylim = 11250

@@ -117,6 +117,7 @@ local function TowerDenyUtility(botBrain)
 			return 65
 		end
 	end
+	return 0
 end
 
 function TowerDeny()

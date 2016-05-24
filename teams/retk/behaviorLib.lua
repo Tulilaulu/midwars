@@ -1602,6 +1602,27 @@ function behaviorLib.ProcessDeath(unit)
 end
 
 ----------------------------------
+local function ScaleDiveUtil(util)
+    local levelSum = 0
+    local heroCount = 0
+    for _, hero in pairs(HoN.GetHeroes(core.myTeam)) do
+        levelSum = levelSum + hero:GetLevel()
+        heroCount = heroCount + 1
+    end
+
+    local avgLevel = levelSum / heroCount
+    local newUtil
+    if avgLevel > 11 then
+        newUtil = util
+    else
+        local scaleVal = 1 - (avgLevel - 1) / 10
+        newUtil = util + util * scaleVal
+    end
+    -- BotEcho(tostring(util) .. " -> " .. tostring(newUtil))
+
+    return newUtil
+end
+
 behaviorLib.diveThreshold = 75
 behaviorLib.lastHarassUtil = 0
 behaviorLib.heroTarget = nil
@@ -1796,7 +1817,7 @@ function behaviorLib.HarassHeroExecute(botBrain)
 		--only attack when in nRange, so not to aggro towers/creeps until necessary, and move forward when attack is on cd
 		if nDistSq < nAttackRangeSq and unitSelf:IsAttackReady() and core.CanSeeUnit(botBrain, unitTarget) then
 			local bInTowerRange = core.NumberElements(core.GetTowersThreateningUnit(unitSelf)) > 0
-			local bShouldDive = behaviorLib.lastHarassUtil >= behaviorLib.diveThreshold
+			local bShouldDive = behaviorLib.lastHarassUtil >= ScaleDiveUtil(behaviorLib.diveThreshold)
 			
 			if bDebugEchos then BotEcho(format("inTowerRange: %s  bShouldDive: %s", tostring(bInTowerRange), tostring(bShouldDive))) end
 			
@@ -1829,7 +1850,7 @@ function behaviorLib.HarassHeroExecute(botBrain)
 			if bDebugEchos then BotEcho("Move - bChanged: "..tostring(bChanged).."  bWellDiving: "..tostring(bWellDiving)) end
 			
 			if not bWellDiving then
-				if behaviorLib.lastHarassUtil < behaviorLib.diveThreshold then
+				if behaviorLib.lastHarassUtil < ScaleDiveUtil(behaviorLib.diveThreshold) then
 					if bDebugEchos then BotEcho("DON'T DIVE!") end
 					
 					if core.NumberElements(core.GetTowersThreateningPosition(vecDesiredPos, nil, core.myTeam)) > 0 then
@@ -1842,7 +1863,7 @@ function behaviorLib.HarassHeroExecute(botBrain)
 						core.OrderMoveToPosAndHoldClamp(botBrain, unitSelf, vecDesiredPos, false)
 					end
 				else
-					if bDebugEchos then BotEcho("DIVIN Tower! util: "..behaviorLib.lastHarassUtil.." > "..behaviorLib.diveThreshold) end
+					if bDebugEchos then BotEcho("DIVIN Tower! util: "..behaviorLib.lastHarassUtil.." > "..ScaleDiveUtil(behaviorLib.diveThreshold)) end
 					core.OrderMoveToPosClamp(botBrain, unitSelf, vecDesiredPos, false)
 				end
 			else

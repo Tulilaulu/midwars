@@ -181,20 +181,24 @@ object.oncombatevent = object.oncombateventOverride
 
 
 -- Harass
---local function CustomHarassUtilityOverride(target)
-  -- local nUtility = 0
+local function CustomHarassUtilityOverride(target)
+    if object:IsPoolDiving() then
+        return -500
+    end
+    return 0
+    -- local nUtility = 0
 
-  -- if skills.hook:CanActivate() then
-    -- nUtility = nUtility + 10
-  -- end
+    -- if skills.hook:CanActivate() then
+    --     nUtility = nUtility + 10
+    -- end
 
-  -- if skills.ulti:CanActivate() then
-    -- nUtility = nUtility + 40
-  -- end
+    -- if skills.ulti:CanActivate() then
+    --     nUtility = nUtility + 40
+    -- end
 
-  -- return behaviorLib.CustomHarassUtility(target) + nUtility
--- end
--- behaviorLib.CustomHarassUtility = CustomHarassUtilityOverride
+    -- return behaviorLib.CustomHarassUtility(target) + nUtility
+end
+behaviorLib.CustomHarassUtility = CustomHarassUtilityOverride
 
 local itemPK = nil
 local FindItemsOld = core.FindItems

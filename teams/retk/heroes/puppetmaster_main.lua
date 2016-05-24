@@ -225,6 +225,11 @@ local function CustomHarassUtilityFnOverride(hero)
     if not unitTarget or not unitTarget:IsValid() or not bSkillsValid then
         return 0 --can not execute, move on to the next behavior
     end
+
+    if object:IsPoolDiving() then
+        return -500
+    end
+
     local ms = unitTarget:GetMoveSpeed() or 0
     local bTargetRooted = unitTarget:IsStunned() or unitTarget:IsImmobilized() or ms < 200
 

@@ -42,3 +42,28 @@ behaviorLib.CourierBehavior["Name"] = "Courier"
 tinsert(behaviorLib.tBehaviors, behaviorLib.CourierBehavior)
 
 object.illusionLib.tIllusionBehaviors["NoBehavior"] = object.illusionLib.Push
+
+function object:IsPoolDiving()
+    local unitTarget = behaviorLib.heroTarget
+    if not unitTarget or not unitTarget:IsValid() then
+        return false
+    end
+
+    local myPos = core.unitSelf:GetPosition()
+    local targetPos = unitTarget:GetPosition()
+
+    local poolDivin = false
+    if core.myTeam == HoN.GetHellbourneTeam() then
+    else
+        local xlim = 8000
+        local ylim = 11250
+        drawLine(Vector3.Create(xlim, 99999), Vector3.Create(xlim, ylim))
+        drawLine(Vector3.Create(xlim, ylim), Vector3.Create(99999, ylim))
+        poolDivin = (targetPos.x > xlim and targetPos.y > ylim) or (myPos.x > xlim and myPos.y > ylim)
+    end
+
+    -- if poolDivin then
+    --     p(object.heroName .. " is avoiding pool diving!")
+    -- end
+    return poolDivin
+end

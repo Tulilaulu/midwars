@@ -273,6 +273,25 @@ behaviorLib.SupportBehavior["Execute"] = behaviorLib.SupportExecute
 behaviorLib.SupportBehavior["Name"] = "Nymphora supprot"
 tinsert(behaviorLib.tBehaviors, behaviorLib.SupportBehavior)
 
+------------------------
+--CustomHarassUtility
+------------------------
+
+
+local function CustomHarassUtilityFnOverride(hero)
+    local unitTarget = behaviorLib.heroTarget
+    if not unitTarget or not unitTarget:IsValid() or not bSkillsValid then
+        return 0 --can not execute, move on to the next behavior
+    end
+
+    if object:IsPoolDiving() then
+        return -500
+    end
+
+    return 0
+end
+behaviorLib.CustomHarassUtility = CustomHarassUtilityFnOverride
+
 -----------
 -- Fight --
 -----------

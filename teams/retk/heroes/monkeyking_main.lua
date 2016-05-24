@@ -139,8 +139,12 @@ object.nRockThreshold = 12
 -- @param: IunitEntity hero
 -- @return: number
 local function CustomHarassUtilityFnOverride(hero)
+    if object:IsPoolDiving() then
+        return -500
+    end
+
     local nUtil = 0
-     
+
     if skills.dash:CanActivate() then
         nUtil = nUtil + object.nDashUp
     end

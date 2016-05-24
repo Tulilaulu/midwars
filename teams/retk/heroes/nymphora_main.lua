@@ -66,13 +66,13 @@ BotEcho('loading nymphora_main...')
 core.tLanePreferences = {Jungle = 0, Mid = 1, ShortSolo = 1, LongSolo = 1, ShortSupport = 5, LongSupport = 5, ShortCarry = 1, LongCarry = 1}
 
 behaviorLib.StartingItems =
-	{"Item_TrinketOfRestoration", "Item_MinorTotem", "Item_CrushingClaws", "Item_ManaPotion"}
+	{"Item_MerricksBounty", "Item_TrinketOfRestoration", "Item_MinorTotem", "Item_CrushingClaws"}
 behaviorLib.LaneItems =
 	{"Item_Marchers", "Item_MysticPotpourri", "Item_EnhancedMarchers"}
 behaviorLib.MidItems =
-	{"Item_Astrolabe", "Item_Morph", "Item_FrostfieldPlate"}
+	{"Item_Astrolabe", "Item_Morph", "Item_NomesWisdom"}
 behaviorLib.LateItems =
-	{"Item_Intelligence7", "Item_Summon"} --Intelligence7 is Staff of the Master
+	{"Item_Summon", "Item_Freeze"} --Intelligence7 is Staff of the Master
 
 
 -- Thresholds --
@@ -428,12 +428,19 @@ function behaviorLib.customPushExecute(botBrain)
 	return bActionTaken
 end
 
--- Walk to own heal
+--heal
 function behaviorLib.getHealedUtility(botBrain)
 	local nTime = HoN.GetGameTime()
 	if nTime - 1100 < object.nHealLastCastTime then
 		local unitSelf = core.unitSelf
-		if unitSelf:GetHealthPercent() < 0.95 then
+		local teammembers = core.localUnits["AllyHeroes"]
+		local isTeamLowHealth = false
+		for _, hero in pairs(teammembers) do
+			if hero.GetHealthPercent < 0.7
+				isTeamLowHealth = true
+		end
+	--	p(teammembers)	
+		if unitSelf:GetHealthPercent() < 0.7 or isTeamLowHealth then
 			local nDistance = Vector3.Distance2D(unitSelf:GetPosition(), object.vecHealPos) - 300
 			if nDistance < unitSelf:GetMoveSpeed() * (nTime - object.nHealLastCastTime) / 1000 then
 				return 40

@@ -30,6 +30,8 @@ object.metadata 	= {}
 object.behaviorLib 	= {}
 object.skills 		= {}
 
+object.heroName = 'Hero_Fairy'
+
 runfile "bots/teams/retk/core.lua"
 runfile "bots/teams/retk/botbraincore.lua"
 runfile "bots/eventsLib.lua"

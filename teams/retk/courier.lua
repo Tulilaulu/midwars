@@ -18,7 +18,7 @@ local function CourierUtility(botBrain)
 
     behaviorLib.foundBird = false
     for i, unit in pairs(HoN.GetUnitsInRadius(core.unitSelf:GetPosition(), 9999999, 0xff)) do
-        if unit:GetTypeName() == "Pet_AutomatedCourier" and unit:GetTeam() == core.unitSelf:GetTeam() then
+        if unit:GetTypeName() == "Pet_AutomatedCourier" and unit:GetTeam() == core.unitSelf:GetTeam() and unit:GetOwnerPlayerID() == core.unitSelf:GetOwnerPlayerID() then
             drawCross(unit:GetPosition(), "red")
             behaviorLib.foundBird = true
             break

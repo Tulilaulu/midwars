@@ -95,10 +95,10 @@ function object:SkillBuild()
   end
 end
 
-behaviorLib.StartingItems = {"Item_IronBuckler", "Item_LoggersHatchet", "2 Item_RunesOfTheBlight"}
-behaviorLib.LaneItems = {"Item_Marchers", "Item_Steamboots", "Item_Lifetube"}
-behaviorLib.MidItems = {"Item_PortalKey", "Item_MagicArmor2"}
-behaviorLib.LateItems = {"Item_BehemothsHeart"}
+behaviorLib.StartingItems = {"Item_MerricksBounty", "Item_LoggersHatchet", "2 Item_RunesOfTheBlight"}
+behaviorLib.LaneItems = {"Item_Marchers", "Item_Steamboots", "Item_MysticVestments"}
+behaviorLib.MidItems = {"Item_PortalKey", "Item_Excruciator", "Item_HealthMana2", "Item_MagicArmor2"}
+behaviorLib.LateItems = {"Item_BehemothsHeart", "Item_BarrierIdol"}
 
 behaviorLib.healAtWellHealthFactor = 1.3
 behaviorLib.healAtWellProximityFactor = 0.5
@@ -201,10 +201,11 @@ end
 behaviorLib.CustomHarassUtility = CustomHarassUtilityOverride
 
 local itemPK = nil
+local itemBarbed = nil
 local FindItemsOld = core.FindItems
 local function FindItemsFn(botBrain)
   FindItemsOld(botBrain)
-  if itemPK then
+  if itemPK and itemBarbed then
     return
   end
   local unitSelf = core.unitSelf
@@ -215,6 +216,9 @@ local function FindItemsFn(botBrain)
       if curItem and not curItem:IsRecipe() then
         if not itemPK and curItem:GetName() == "Item_PortalKey" then
           itemPK = core.WrapInTable(curItem)
+        end
+        if not itemBarbed and curItem:GetName() == "Item_Excruciator" then
+          itemBarbed = core.WrapInTable(curItem)
         end
       end
     end
@@ -458,5 +462,27 @@ RotDisableBehavior["Utility"] = RotDisableUtility
 RotDisableBehavior["Execute"] = RotDisableExecute
 RotDisableBehavior["Name"] = "Rot disable"
 tinsert(behaviorLib.tBehaviors, RotDisableBehavior)
+
+local BarbedUseBehavior = {}
+local function BarbedUseUtility(botBrain)
+  local hpVelo = core.unitSelf:GetHealthVelocity() 
+  if itemBarbed and itemBarbed:CanActivate() and hpVelo < -200 then
+    p(hpVelo)
+    return 93
+  end
+  return 0
+end
+local function BarbedUseExecute(botBrain)
+  p("USING BARBED ARMOR!")
+  if itemBarbed and itemBarbed:CanActivate() then
+    core.OrderItemClamp(botBrain, unitSelf, itemBarbed)
+    return true
+  end
+  return false
+end
+BarbedUseBehavior["Utility"] = BarbedUseUtility
+BarbedUseBehavior["Execute"] = BarbedUseExecute
+BarbedUseBehavior["Name"] = "Barbed Use"
+tinsert(behaviorLib.tBehaviors, BarbedUseBehavior)
 
 BotEcho('finished loading devourer_main')

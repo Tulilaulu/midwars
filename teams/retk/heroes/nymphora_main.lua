@@ -132,6 +132,12 @@ tinsert(behaviorLib.tBehaviors, TowerDenyBehavior)
 
 local function AbilitiesUpUtility(hero)
 	local nUtility = 0
+        local unitTarget = behaviorLib.heroTarget
+        if not unitTarget or not unitTarget:IsValid() or not bSkillsValid then
+            return 0 --can not execute, move on to the next behavior
+        end
+        local ms = unitTarget:GetMoveSpeed() or 0
+        local bTargetRooted = unitTarget:IsStunned() or unitTarget:IsImmobilized() or ms < 200
 	
 	if skills.heal:CanActivate() then
 		nUtility = nUtility + object.nHealUp
@@ -142,7 +148,7 @@ local function AbilitiesUpUtility(hero)
 	end
 	
 	local itemSheepstick = core.GetItem("Item_Morph")
-	if itemSheepstick ~= nil and itemSheepstick:CanActivate() then
+	if itemSheepstick ~= nil and itemSheepstick:CanActivate() and not bTargetRooted then
 		nUtility = nUtility + object.nSheepstickUp
 	end
 
@@ -336,6 +342,8 @@ function HarassHeroExecuteOverride(botBrain)
 
 	local nLastHarassUtil = behaviorLib.lastHarassUtil
 	local bCanSee = core.CanSeeUnit(botBrain, unitTarget)
+        local ms = unitTarget:GetMoveSpeed() or 0
+        local bTargetRooted = unitTarget:IsStunned() or unitTarget:IsImmobilized() or ms < 200
 
 	local vecPosInHalfSec = vecTargetPosition
 	if bCanSee then
@@ -361,7 +369,7 @@ function HarassHeroExecuteOverride(botBrain)
 			local itemSheepstick = core.GetItem("Item_Morph")
 			if itemSheepstick then
 				local nRange = itemSheepstick:GetRange()
-				if itemSheepstick:CanActivate() and nLastHarassUtil > object.nSheepstickThreshold then
+				if itemSheepstick:CanActivate() and nLastHarassUtil > object.nSheepstickThreshold and not bTargetRooted and unitTarget:GetHealthPercent() > 0.3 then
 					if nTargetDistanceSq < (nRange * nRange) then
 						bActionTaken = core.OrderItemEntityClamp(botBrain, unitSelf, itemSheepstick, unitTarget)
 					end

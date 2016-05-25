@@ -287,7 +287,7 @@ local function HarassHeroExecuteOverride(botBrain)
                 -- p("moving to pole range")
                 bActionTaken = core.OrderMoveToUnitClamp(botBrain, unitSelf, unitTarget)
             else
-                p("not going to cast pole in tower range")
+                if object.debugMkTowerDiving then p("not going to cast pole in tower range") end
             end
         end
     end
@@ -304,7 +304,7 @@ local function HarassHeroExecuteOverride(botBrain)
                     -- p("moving to rock range")
                     bActionTaken = core.OrderMoveToUnitClamp(botBrain, unitSelf, unitTarget)
                 else
-                    p("not going to cast rock in tower range")
+                    if object.debugMkTowerDiving then p("not going to cast rock in tower range") end
                 end
             end
         end 

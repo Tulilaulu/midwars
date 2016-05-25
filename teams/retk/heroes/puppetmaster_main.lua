@@ -76,11 +76,11 @@ behaviorLib.debugHarassExecute = false
 core.tLanePreferences = {Jungle = 0, Mid = 5, ShortSolo = 4, LongSolo = 0, ShortSupport = 0, LongSupport = 0, ShortCarry = 4, LongCarry = 3}
 
 behaviorLib.StartingItems =
-	{"Item_RunesOfTheBlight", "2 Item_MinorTotem", "Item_ManaBattery", "Item_MarkOfTheNovice" }
+	{"Item_MerricksBounty", "2 Item_MinorTotem", "Item_ManaBattery", "Item_MarkOfTheNovice" }
 behaviorLib.LaneItems =
-	{ "Item_PowerSupply", "Item_Marchers", "Item_ApprenticesRobe", "Item_PretendersCrown", "Item_Steamboots", "Item_Intelligence5"}
+	{ "Item_PowerSupply", "Item_Marchers", "Item_PretendersCrown", "Item_Intelligence5", "Item_GraveLocket", "Item_ApprenticesRobe", "Item_Steamboots"}
 behaviorLib.MidItems =
-	{"Item_Punchdagger", "Item_Broadsword", "Item_Critical1", "Item_AcolytesStaff", "Item_LuminousPrism", "Item_Morph" } -- Items: Shaman's Headress, Daemonic Breastplate, Icebrand
+	{"Item_Shield2", "Item_WhisperingHelm", "Item_Glowstone", "Item_Beastheart", "Item_HealthMana2",  "Item_AcolytesStaff", "Item_LuminousPrism", "Item_Morph" } -- Items: Shaman's Headress, Daemonic Breastplate, Icebrand
 behaviorLib.LateItems =
 	{"Item_BehemothsHeart"} -- Items: Behemoth's Heart, Upg Icebrang into Frostwolf Skull
 

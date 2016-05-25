@@ -1908,9 +1908,9 @@ function behaviorLib.HitBuildingUtility(botBrain)
 	local bDebugEchos = false
 	local lineLen = 150
 
-	local throneUtil = 40
+	local throneUtil = 75
 	local raxUtil = 36
-	local towerUtil = 25
+	local towerUtil = 28
 	local otherBuildingUtil = 23
 
 	local utility = 0
@@ -1970,7 +1970,7 @@ function behaviorLib.HitBuildingUtility(botBrain)
 					if not tower:IsInvulnerable() and core.IsUnitInRange(unitSelf, tower, nRange + nExtraRange) and core.CanSeeUnit(botBrain, tower) then
 						if core.IsTowerSafe(tower, unitSelf) then
 							target = tower
-							utility = towerUtil
+							utility = towerUtil + 4 * tower:GetLevel()
 							break
 						end
 					end

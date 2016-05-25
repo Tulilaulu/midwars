@@ -15,6 +15,44 @@ local generics = object.generics
 
 BotEcho("loading default generics ..")
 
+local skillshot_spots_file = "/bots/teams/default/metadata/skillshot_spots.botmetadata"
+local function RegisterSkillshots()
+  if not metadata.tMetadataFileNames[skillshot_spots_file] then
+    metadata.tMetadataFileNames[skillshot_spots_file] = true
+    BotEcho("Trying to register \""..skillshot_spots_file.."\"")
+    BotMetaData.RegisterLayer(skillshot_spots_file)
+  end
+end
+
+function generics.GetOwnSkillshotSpots()
+  metadata.SetActiveLayer(skillshot_spots_file)
+  local tNodes = BotMetaData.GetAllNodes()
+  metadata.SetActiveLayer(metadata.MapMetadataFile)
+  local tOwnNodes = {}
+  local team = nil
+  if core.myTeam == HoN.GetLegionTeam() then
+    team = "legion"
+  else
+    team = "hellbourne"
+  end
+  for _, node in pairs(tNodes) do
+    if node:GetProperty("zone") == team then
+      tinsert(tOwnNodes, node)
+    end
+  end
+  return tOwnNodes
+end
+
+local onthinkOld = object.onthink
+local function onthinkOverride(botBrain, tGameVariables)
+  onthinkOld(botBrain, tGameVariables)
+  RegisterSkillshots()
+end
+object.onthink = onthinkOverride
+
+behaviorLib.nMaxLevelDifference = 0
+behaviorLib.nEnemyBaseThreat = 0
+
 local oncombateventOld = object.oncombatevent
 local function oncombateventCustom(botBrain, EventData)
   oncombateventOld(botBrain, EventData)
@@ -36,6 +74,7 @@ end
 object.oncombatevent = oncombateventCustom
 
 behaviorLib.nPathEnemyTowerMul = 100
+behaviorLib.nPathEnemyTerritoryMul = 0
 
 local function PassiveState()
   local tLane = core.tMyLane
@@ -49,7 +88,7 @@ local function PassiveState()
     local distanceAlly = Vector3.Distance2D(creepPos, towerPos)
     local distanceEnemy = Vector3.Distance2D(creepPos, otherTowerPos)
     --BotEcho("DA:"..distanceAlly..";DE:"..distanceEnemy)
-    if (distanceAlly < distanceEnemy and distanceEnemy < 2500) or (distanceAlly > distanceEnemy and distanceAlly < 2500) then
+    if (distanceAlly < distanceEnemy and distanceEnemy < 2300) or (distanceAlly > distanceEnemy and distanceAlly < 2300) then
       return true
     end
   end

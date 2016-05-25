@@ -330,4 +330,24 @@ RotDisableBehavior["Execute"] = RotDisableExecute
 RotDisableBehavior["Name"] = "Rot disable"
 tinsert(behaviorLib.tBehaviors, RotDisableBehavior)
 
+
+local PositionSelfLogicOld = behaviorLib.PositionSelfLogic
+local function PositionSelfLogicOverride(botBrain)
+  local pos = PositionSelfLogicOld(botBrain)
+  local originalPos = core.unitSelf:GetPosition()
+  local pos2 = nil
+  for _, node in pairs(generics.GetOwnSkillshotSpots()) do
+    local nodePos = node:GetPosition()
+    local nAllies = core.NumberElements(HoN.GetUnitsInRadius(nodePos, 100, core.UNIT_MASK_ALIVE + core.UNIT_MASK_HERO))
+    if Vector3.Distance2D(nodePos, pos) < 2000 and nAllies == 0 then
+      if not pos2 or Vector3.Distance2D(pos2, originalPos) > Vector3.Distance2D(nodePos, originalPos) then
+        pos = nodePos
+        pos2 = nodePos
+      end
+    end
+  end
+  return pos
+end
+behaviorLib.PositionSelfLogic = PositionSelfLogicOverride
+
 BotEcho('finished loading devourer_main')

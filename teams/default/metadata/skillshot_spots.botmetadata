@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<botmetadata version="1">
+  <nodes>
+    <node index="0" name="" x="7800.0000" y="6600.0000" z="0.0000" radius="32.0000">
+      <property name="zone" type="string" value="legion" />
+    </node>
+    <node index="1" name="" x="6400.0000" y="8000.0000" z="0.0000" radius="32.0000">
+      <property name="zone" type="string" value="legion" />
+    </node>
+    <node index="2" name="" x="8800.0000" y="7500.0000" z="0.0000" radius="32.0000">
+      <property name="zone" type="string" value="hellbourne" />
+    </node>
+    <node index="3" name="" x="7600.0000" y="8600.0000" z="0.0000" radius="32.0000">
+      <property name="zone" type="string" value="hellbourne" />
+    </node>
+  </nodes>
+  <links />
+</botmetadata>

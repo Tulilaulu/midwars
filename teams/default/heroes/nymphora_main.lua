@@ -117,7 +117,7 @@ local function HarassHeroExecuteOverride(botBrain)
     local stun = skills.stun
     if stun:CanActivate() and core.unitSelf:GetMana() > 50 then
       local nRange = stun:GetRange()
-      if nTargetDistanceSq < (nRange * nRange) then
+      if not unitTarget:IsStunned() and nTargetDistanceSq < (nRange * nRange) then
         bActionTaken = core.OrderAbilityPosition(botBrain, stun, unitTarget:GetPosition())
       else
         bActionTaken = core.OrderMoveToUnitClamp(botBrain, unitSelf, unitTarget)

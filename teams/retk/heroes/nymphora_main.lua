@@ -105,31 +105,6 @@ object.nHealLastCastTime = -20000
 -- misc --
 behaviorLib.bTPWithNymph = false -- Don't try to tp with yourself
 
-local function TowerDenyUtility(botBrain)
-  	for _, tower in pairs(core.localUnits["AllyTowers"]) do
-		if tower:GetHealthPercent() < 0.005 then
-			return 100
-		end	
-		if tower:GetHealthPercent() < 0.01 then
-			return 85
-		end
-		if tower:GetHealthPercent() < 0.03 then
-			return 65
-		end
-	end
-	return 0
-end
-
-function TowerDeny()
-	core.OrderAttack(botBrain, object, tower, false)
-end
-
-local TowerDenyBehavior = {}
-TowerDenyBehavior["Utility"] = TowerDenyUtility
-TowerDenyBehavior["Execute"] = TowerDeny
-TowerDenyBehavior["Name"] = "TowerDeny"
-tinsert(behaviorLib.tBehaviors, TowerDenyBehavior)
-
 local function AbilitiesUpUtility(hero)
 	local nUtility = 0
         local unitTarget = behaviorLib.heroTarget
@@ -378,12 +353,12 @@ function HarassHeroExecuteOverride(botBrain)
 		end
 	end
 	if not bActionTaken then
-		local itemFrostfieldPlate = core.GetItem("Item_FrostfieldPlate")
-		if itemFrostfieldPlate ~= nil and itemFrostfieldPlate:CanActivate() then
+		local itemFreeze = core.GetItem("Item_Freeze")
+		if itemFreeze ~= nil and itemFreeze:CanActivate() then
 			if nLastHarassUtil > object.nFrostfieldThreshold then
 				local nRangeSQ = 700 * 700
 				if nRangeSQ > nTargetDistanceSq then
-					botBrain:OrderItem(itemFrostfieldPlate.object, "None")
+					botBrain:OrderItem(itemFreeze.object, "None")
 					bActionTaken = true
 				end
 			end

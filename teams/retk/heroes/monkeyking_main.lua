@@ -59,14 +59,19 @@ core.tLanePreferences = {Jungle = 0, Mid = 5, ShortSolo = 0, LongSolo = 0, Short
 ----------------------------------
 --      MK items
 ----------------------------------
+-- {Minor, Minor, Battery, Guardian Ring} -> {Power Supply, Guardian Ring} -> {PowerSupply, Marchers, GuardianRing} -> {PowerSupply, Marchers, GuardianRing, Punchdagger} ->
+-- {PowerSupply, PhaseBoots, GuardianRing, } -> {PowerSupply, PhaseBoots, GuardianRing, Ringmail} -> {PowerSupply, PhaseBoots, Bulwark} ->
+-- {PowerSupply, PhaseBoots, Bulwark} -> {PowerSupply, PhaseBoots, Bulwark, Glowstone} -> {PowerSupply, PhaseBoots, Bulwark, Glowstone, Beastheart} ->
+-- {PowerSupply, PhaseBoots, Bulwark, Icon} -> {PowerSupply, PhaseBoots, Bulwark, Icon, Platemail} -> {PowerSupply, PhaseBoots, Bulwark, Icon, Platemail, Warpcleft}
+-- Blue boots, Bulwark, Icon
 behaviorLib.StartingItems =
-	{"Item_LoggersHatchet", "2 Item_MinorTotem", "Item_ManaBattery"}
+	{"2 Item_MinorTotem", "Item_ManaBattery", "Item_GuardianRing" }
 behaviorLib.LaneItems =
 	{ "Item_PowerSupply", "Item_Marchers", "Item_Punchdagger", "Item_EnhancedMarchers"} -- Items: power supply, ghost marchers
 behaviorLib.MidItems =
-	{"Item_Manatube", "Item_Lifetube", "Item_Glowstone", "Item_Protect", "Item_GuardianRing", "Item_Ringmail", "Item_SolsBulwark"} -- Items: nullstone, sols bulwark
+	{ "Item_Ringmail", "Item_SolsBulwark", "Item_Glowstone", "Item_Beastheart", "Item_HealthMana2" } -- Items: bulwark, Icon
 behaviorLib.LateItems =
-	{"Item_Warhammer", "Item_Pierce", "Item_Voulge", "Item_Weapon3"} -- Items: shieldbreaker, savage mace
+	{ "Item_Platemail", "Item_DaemonicBreastplate", "Item_Glowstone", "Item_Protect", "Item_Warhammer", "Item_Pierce", "Item_Voulge", "Item_Weapon3"} -- Items: daemonic, nullstone, shieldbreaker, savage mace
 
 behaviorLib.healAtWellHealthFactor = 1.3
 behaviorLib.healAtWellProximityFactor = 0.5

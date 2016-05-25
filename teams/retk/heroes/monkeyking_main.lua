@@ -17,6 +17,7 @@ object.bOtherCommands = true
 object.bReportBehavior = true
 object.bDebugUtility = false
 object.bDebugExecute = false
+object.debugMkTowerDiving = false
 
 object.logger = {}
 object.logger.bWriteLog = false
@@ -218,27 +219,47 @@ object.oncombatevent    = object.oncombateventOverride
 -- @return: none
 --
 local function HarassHeroExecuteOverride(botBrain)
-     
     local unitTarget = behaviorLib.heroTarget
-    if unitTarget == nil then
+    if unitTarget == nil or not unitTarget:IsValid() then
         return object.harassExecuteOld(botBrain)  --Target is invalid, move on to the next behavior
     end
-     
-     
+
+
     local unitSelf = core.unitSelf
     local vecMyPosition = unitSelf:GetPosition() 
     local nAttackRange = core.GetAbsoluteAttackRangeToUnit(unitSelf, unitTarget)
     local nMyExtraRange = core.GetExtraRange(unitSelf)
-     
+
     local vecTargetPosition = unitTarget:GetPosition()
     local nTargetExtraRange = core.GetExtraRange(unitTarget)
     local nTargetDistanceSq = Vector3.Distance2DSq(vecMyPosition, vecTargetPosition)
- 
-     
+
+    local bTargetRooted = unitTarget:IsStunned() or unitTarget:IsImmobilized() or unitTarget:GetMoveSpeed() < 200
+    local towersNearTarget = core.GetTowersThreateningPosition(vecTargetPosition, 0, unitSelf:GetTeam())
+    if object.debugMkTowerDiving then p(towersNearTarget) end
+    local targetInTowerRange = core.NumberElements(towersNearTarget) > 0
+    if object.debugMkTowerDiving then p(targetInTowerRange) end
+    if unitTarget:GetHealthPercent() < 0.4 then
+        if object.debugMkTowerDiving then p("target low health, diving") end
+        targetInTowerRange = false
+    end
+    if bTargetRooted and unitTarget:GetHealthPercent() < 0.7 then
+        if object.debugMkTowerDiving then p("target stunned, diving") end
+        targetInTowerRange = false
+    end
+
+    if object.debugMkTowerDiving then 
+        if targetInTowerRange then
+            drawCross(vecTargetPosition, "red")
+        else
+            drawCross(vecTargetPosition, "green")
+        end
+    end
+
     local nLastHarassUtility = behaviorLib.lastHarassUtil
     local bCanSee = core.CanSeeUnit(botBrain, unitTarget)    
     local bActionTaken = false
- 
+
     --since we are using an old pointer, ensure we can still see the target for entity targeting
     if core.CanSeeUnit(botBrain, unitTarget) then
         local bTargetVuln = unitTarget:IsStunned() or unitTarget:IsImmobilized() or unitTarget:IsPerplexed()
@@ -249,7 +270,7 @@ local function HarassHeroExecuteOverride(botBrain)
                 if nTargetDistanceSq < (nRange * nRange) then
                     -- p("casting dash")
                     bActionTaken = core.OrderAbility(botBrain, skills.dash)
-                end          
+                end
             end
         end
     end
@@ -262,9 +283,11 @@ local function HarassHeroExecuteOverride(botBrain)
             if nTargetDistanceSq < (nRange * nRange) then
                 -- p("casting pole")
                 bActionTaken = core.OrderAbilityEntity(botBrain, skills.pole, unitTarget)
-            else
+            elseif not targetInTowerRange then
                 -- p("moving to pole range")
                 bActionTaken = core.OrderMoveToUnitClamp(botBrain, unitSelf, unitTarget)
+            else
+                p("not going to cast pole in tower range")
             end
         end
     end
@@ -277,22 +300,24 @@ local function HarassHeroExecuteOverride(botBrain)
                 if nTargetDistanceSq < (nRange * nRange) then
                     -- p("casting rock")
                     bActionTaken = core.OrderAbility(botBrain, skills.rock)
-                else
+                elseif not targetInTowerRange then
                     -- p("moving to rock range")
                     bActionTaken = core.OrderMoveToUnitClamp(botBrain, unitSelf, unitTarget)
+                else
+                    p("not going to cast rock in tower range")
                 end
             end
         end 
     end 
-     
+
     if not bActionTaken then
         return object.harassExecuteOld(botBrain) 
     end
 
 end
- 
- 
- 
+
+
+
 -- overload the behaviour stock function with custom 
 object.harassExecuteOld = behaviorLib.HarassHeroBehavior["Execute"]
 behaviorLib.HarassHeroBehavior["Execute"] = HarassHeroExecuteOverride

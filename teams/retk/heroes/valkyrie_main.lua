@@ -323,7 +323,8 @@ local function HarassHeroExecuteOverride(botBrain)
 
     local vecMyPosition = unitSelf:GetPosition()
     local vecAfterLeap = vecMyPosition + unitSelf:GetHeading() * LeapRange[skills.leap:GetLevel()]
-    local leapPosInTowerRange = #core.GetTowersThreateningPosition(vecAfterLeap, 0, unitSelf:GetTeam()) > 0
+    local towersNearTarget  = core.GetTowersThreateningPosition(vecAfterLeap, 0, unitSelf:GetTeam())
+    local leapPosInTowerRange = core.NumberElements(towersNearTarget) > 0
 
     local nAttackRangeSq = core.GetAbsoluteAttackRangeToUnit(unitSelf, unitTarget)
     nAttackRangeSq = nAttackRangeSq * nAttackRangeSq

@@ -14,7 +14,7 @@ object.bAttackCommands = true
 object.bAbilityCommands = true
 object.bOtherCommands = true
 
-object.bReportBehavior = false
+object.bReportBehavior = true
 object.bDebugUtility = false
 object.bDebugExecute = false
 
@@ -102,6 +102,9 @@ behaviorLib.LateItems = {"Item_BehemothsHeart"}
 
 behaviorLib.healAtWellHealthFactor = 1.3
 behaviorLib.healAtWellProximityFactor = 0.5
+
+behaviorLib.debugHarassUtility = true
+behaviorLib.debugHarassExecute = false
 
 
 local function creepsInWay(unitTarget, drawLines)

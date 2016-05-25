@@ -1632,13 +1632,15 @@ end
 behaviorLib.diveThreshold = 75
 behaviorLib.lastHarassUtil = 0
 behaviorLib.heroTarget = nil
+behaviorLib.debugHarassUtility = false
+behaviorLib.debugHarassExecute = false
 
 behaviorLib.rangedHarassBuffer = 300
 
 behaviorLib.harassUtilityWeight = 1.0
 
 function behaviorLib.HarassHeroUtility(botBrain)
-	local bDebugEchos = false
+	local bDebugEchos = behaviorLib.debugHarassUtility
 	
 	--if core.unitSelf:GetTypeName() == "Hero_Predator" then bDebugEchos = true end
 		
@@ -1703,7 +1705,7 @@ function behaviorLib.HarassHeroUtility(botBrain)
 				unitWeakestEnemy = unitEnemy
 			end
 			
-			if bDebugEchos then BotEcho(nID..": "..unitEnemy:GetTypeName().."  threat: "..Round(nThreat).."  defense: "..Round(nDefense)) end
+			if bDebugEchos then BotEcho("Enemy "..nID..": "..unitEnemy:GetTypeName().."  threat: "..Round(nThreat).."  defense: "..Round(nDefense)) end
 		end
 		
 		--Aquire a target
@@ -1726,7 +1728,7 @@ function behaviorLib.HarassHeroUtility(botBrain)
 						nThreatMul = 1 - (nDistance - nHalfAllyThreatRange) / nHalfAllyThreatRange						
 					end
 					
-					if bDebugEchos then BotEcho(format("%s  dot: %g  nThreatMul: %g  nDistance: %d  nRange: %d",
+					if bDebugEchos then BotEcho(format("Ally %s  dot: %g  nThreatMul: %g  nDistance: %d  nRange: %d",
 						unitAlly:GetTypeName(), Vector3.Dot(vecTowardsAlly, vecTowardsTarget), nThreatMul, nDistance, nAllyThreatRange))
 					end
 					
@@ -1736,7 +1738,7 @@ function behaviorLib.HarassHeroUtility(botBrain)
 				end
 				
 				nTotalAllyThreat = nTotalAllyThreat + nThreat
-				if bDebugEchos then BotEcho(nID..": "..unitAlly:GetTypeName().."  threat: "..Round(nThreat)) end
+				if bDebugEchos then BotEcho("Ally " .. nID..": "..unitAlly:GetTypeName().."  threat: "..Round(nThreat)) end
 			end			
 		end
 		--if bDebugEchos then BotEcho("totalAllyThreat: "..Round(nTotalAllyThreat)) end
@@ -1799,7 +1801,7 @@ function behaviorLib.HarassHeroUtility(botBrain)
 end
 
 function behaviorLib.HarassHeroExecute(botBrain)
-	local bDebugEchos = false
+	local bDebugEchos = behaviorLib.debugHarassExecute
 	--[[
 	if object.myName == "Bot1" then
 		bDebugEchos = true

@@ -234,8 +234,8 @@ function object:onthinkOverride(tGameVariables)
     local unitTarget = behaviorLib.heroTarget
     if unitTarget and unitTarget:IsValid() and core.CanSeeUnit(object, unitTarget) then
         creepsInWay(unitTarget, object.debugArrow)
+        countCreepsForCallOfValkyrie(unitTarget, object.debugCall)
     end
-    countCreepsForCallOfValkyrie(unitTarget, object.debugCall)
 
 
   -- custom code here

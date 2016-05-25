@@ -14,7 +14,7 @@ object.bAttackCommands = true
 object.bAbilityCommands = true
 object.bOtherCommands = true
 
-object.bReportBehavior = true
+object.bReportBehavior = false
 object.bDebugUtility = false
 object.bDebugExecute = false
 
@@ -103,7 +103,7 @@ behaviorLib.LateItems = {"Item_BehemothsHeart", "Item_BarrierIdol"}
 behaviorLib.healAtWellHealthFactor = 1.3
 behaviorLib.healAtWellProximityFactor = 0.5
 
-behaviorLib.debugHarassUtility = true
+behaviorLib.debugHarassUtility = false
 behaviorLib.debugHarassExecute = false
 
 

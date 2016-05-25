@@ -68,9 +68,9 @@ core.tLanePreferences = {Jungle = 0, Mid = 1, ShortSolo = 1, LongSolo = 1, Short
 behaviorLib.StartingItems =
 	{"Item_MerricksBounty", "Item_TrinketOfRestoration", "Item_MinorTotem", "Item_CrushingClaws"}
 behaviorLib.LaneItems =
-	{"Item_Marchers", "Item_MysticPotpourri", "Item_EnhancedMarchers"}
+	{"Item_Marchers", "Item_MysticPotpourri", "Item_PlatedGreaves"}
 behaviorLib.MidItems =
-	{"Item_Astrolabe", "Item_Morph", "Item_HealthMana2"}
+	{"Item_Astrolabe", "Item_Beastheart", "Item_Glowstone", "Item_HealthMana2", "Item_AcolytesStaff", "Item_Morph"}
 behaviorLib.LateItems =
 	{"Item_Summon", "Item_BehemothsHeart"} --Intelligence7 is Staff of the Master
 

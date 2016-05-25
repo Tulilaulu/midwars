@@ -97,3 +97,4 @@ TowerDenyBehavior["Utility"] = TowerDenyUtility
 TowerDenyBehavior["Execute"] = TowerDeny
 TowerDenyBehavior["Name"] = "TowerDeny"
 tinsert(behaviorLib.tBehaviors, TowerDenyBehavior)
+

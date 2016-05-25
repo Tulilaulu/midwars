@@ -112,8 +112,8 @@ function object:SkillBuild()
   object.tSkills = {
    0, 1, 2, 1, 1,
    3, 2, 2, 0, 0,
-   1, 2, 0, 3, 3,
-   4, 4, 4, 4, 4,
+   1, 2, 0, 3, 4,
+   3, 4, 4, 4, 4,
    4, 4, 4, 4, 4,
   }
   local nlev = unitSelf:GetLevel()

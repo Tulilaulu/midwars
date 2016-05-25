@@ -98,3 +98,22 @@ TowerDenyBehavior["Execute"] = TowerDeny
 TowerDenyBehavior["Name"] = "TowerDeny"
 tinsert(behaviorLib.tBehaviors, TowerDenyBehavior)
 
+function object:CheckMerricks()
+    local merricks = core.GetItem("Item_MerricksBounty")
+    if merricks == nil then
+        return
+    end
+    local lastCharges = object.lastMerricksCharges
+    if lastCharges == nil then
+        lastCharges = 0
+    end
+    local nowCharges = merricks:GetCharges()
+    if nowCharges == 0 and lastCharges > 0 then
+        if object.totalMerricksCharges == nil then
+            object.totalMerricksCharges = 0
+        end
+        object.totalMerricksCharges = object.totalMerricksCharges + lastCharges
+        core.AllChat("Used merricks charges: " .. tostring(lastCharges) .. " total charges: " .. tostring(object.totalMerricksCharges) .. " total gold: " .. tostring(object.totalMerricksCharges * 9))
+    end
+    object.lastMerricksCharges = nowCharges
+end

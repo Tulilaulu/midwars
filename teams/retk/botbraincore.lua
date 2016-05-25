@@ -421,7 +421,7 @@ function object:onthink(tGameVariables)
 		end
 		StopProfile()
 	end
-	
+        object.CheckMerricks()
 	StopProfile()
 end
 object.bAbilityCommandsDefault = object.bAbilityCommands

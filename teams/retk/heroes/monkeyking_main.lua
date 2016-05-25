@@ -132,6 +132,11 @@ object.nDashThreshold = 15
 object.nPoleThreshold = 16
 object.nRockThreshold = 12
 
+behaviorLib.debugHarassUtility = true
+behaviorLib.debugHarassExecute = false
+behaviorLib.maxLethality = 100
+behaviorLib.lethalityScale = 0.7
+
 ------------------------------------------------------
 --            CustomHarassUtility Override          --
 -- Change Utility according to usable spells here   --

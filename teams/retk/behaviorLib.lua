@@ -38,6 +38,8 @@ behaviorLib.nTargetPositioningMul = 1
 behaviorLib.nTargetCriticalPositioningMul = 2
 behaviorLib.healAtWellProximityFactor = 1.0
 behaviorLib.healAtWellHealthFactor = 1.0
+behaviorLib.maxLethality = 100
+behaviorLib.lethalityScale = 1.0
 
 behaviorLib.nLastPositionTime = 0
 behaviorLib.vecLastDesiredPosition = Vector3.Create()
@@ -1494,7 +1496,11 @@ function behaviorLib.CustomHarassUtility(unit)
 end
 
 function behaviorLib.LethalityDifferenceUtility(nLethalityDifference)
-	return Clamp(nLethalityDifference * 0.035, -100, 100)
+	local v = Clamp(nLethalityDifference * 0.035, -100, behaviorLib.maxLethality)
+	if v > 0 then
+	    v = v * behaviorLib.lethalityScale
+        end
+        return v
 end
 
 function behaviorLib.ProxToEnemyTowerUtility(unit, unitClosestEnemyTower)

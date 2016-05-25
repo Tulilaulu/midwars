@@ -55,6 +55,7 @@ object.heroName = 'Hero_PuppetMaster'
 object.nUltiUp = 30
 object.nShowUp = 10
 object.nHoldUp = 19
+object.nSheepstickUp = 15
 object.nStunUtil = 20 -- extra aggression if target stunned
 
 object.nUltiUse = 19
@@ -64,6 +65,10 @@ object.nHoldUse = 22
 object.nUltiThreshold = 21
 object.nShowThreshold = 11
 object.nHoldThreshold = 13
+object.nSheepstickThreshold = 30
+
+behaviorLib.debugHarassUtility = false
+behaviorLib.debugHarassExecute = false
 
 --------------------------------
 -- Lanes
@@ -243,8 +248,15 @@ local function CustomHarassUtilityFnOverride(hero)
     if skills.hold:CanActivate() then
         utility = utility + object.nHoldUp
     end
+    if skills.hold:CanActivate() then
+        utility = utility + object.nHoldUp
+    end
     if bTargetRooted then
         utility = utility + object.nStunUtil
+    end
+    local itemSheepstick = core.GetItem("Item_Morph")
+    if itemSheepstick ~= nil and itemSheepstick:CanActivate() and not bTargetRooted then
+            utility = utility + object.nSheepstickUp
     end
 
     if unitTarget:GetTypeName() == "Pet_PuppetMaster_Ability4" then
@@ -295,6 +307,18 @@ local function HarassHeroExecuteOverride(botBrain)
             if nTargetDistanceSq < (nRange * nRange) then
                 -- p("using taunt")
                 bActionTaken = core.OrderAbilityEntity(botBrain, abilTaunt, unitTarget)
+            end
+        end
+    end
+
+    if not bActionTaken and bCanSeeUnit then
+        local itemSheepstick = core.GetItem("Item_Morph")
+        if itemSheepstick then
+            local nRange = itemSheepstick:GetRange()
+            if itemSheepstick:CanActivate() and nLastHarassUtility > object.nSheepstickThreshold and not bTargetRooted and unitTarget:GetHealthPercent() > 0.3 then
+                if nTargetDistanceSq < (nRange * nRange) then
+                        bActionTaken = core.OrderItemEntityClamp(botBrain, unitSelf, itemSheepstick, unitTarget)
+                end
             end
         end
     end

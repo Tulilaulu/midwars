@@ -97,7 +97,7 @@ end
 
 behaviorLib.StartingItems = {"Item_MerricksBounty", "Item_ManaBattery", "2 Item_MinorTotem"}
 behaviorLib.LaneItems = {"Item_Marchers", "Item_Steamboots", "Item_MysticVestments"}
-behaviorLib.MidItems = {"Item_PortalKey", "Item_Excruciator", "Item_HealthMana2", "Item_MagicArmor2", "Item_AxeOfTheMalphai"} -- Items: PK, Barbed, Icon, Shamans, Malphai for behe heart
+behaviorLib.MidItems = {"Item_PortalKey", "Item_MagicArmor2", "Item_Excruciator", "Item_Glowstone", "Item_HealthMana2", "Item_AxeOfTheMalphai"} -- Items: PK, Barbed, Icon, Shamans, Malphai for behe heart
 behaviorLib.LateItems = {"Item_BehemothsHeart", "Item_BarrierIdol", "Item_BehemothsHeart"}
 
 behaviorLib.healAtWellHealthFactor = 1.3
@@ -182,25 +182,110 @@ end
 object.oncombateventOld = object.oncombatevent
 object.oncombatevent = object.oncombateventOverride
 
+local function DetermineUltiTarget(ulti)
+  local tLocalEnemies = core.localUnits["EnemyHeroes"]
+  local maxDistance = ulti:GetRange()
+  local maxDistanceSq = maxDistance * maxDistance
+  local myPos = core.unitSelf:GetPosition()
+  local unitTarget = nil
+  local distanceTarget = 999999999
+  for _, unitEnemy in pairs(tLocalEnemies) do
+    local enemyPos = unitEnemy:GetPosition()
+    local distanceEnemy = Vector3.Distance2DSq(myPos, enemyPos)
+    if distanceEnemy < maxDistanceSq then
+      if distanceEnemy < distanceTarget and not creepsInWay(unitEnemy, false) then
+        unitTarget = unitEnemy
+        distanceTarget = distanceEnemy
+      end
+    end
+  end
+  return unitTarget
+end
+
+local function DetermineHookTarget(hook)
+  local tLocalEnemies = core.localUnits["EnemyHeroes"]
+  local maxDistance = hook:GetRange()
+  local maxDistanceSq = maxDistance * maxDistance
+  local myPos = core.unitSelf:GetPosition()
+  local unitTarget = nil
+  local distanceTarget = 999999999
+  for _, unitEnemy in pairs(tLocalEnemies) do
+    local enemyPos = unitEnemy:GetPosition()
+    local distanceEnemy = Vector3.Distance2DSq(myPos, enemyPos)
+    if distanceEnemy < maxDistanceSq then
+      if distanceEnemy < distanceTarget and not creepsInWay(unitEnemy, false) then
+        unitTarget = unitEnemy
+        distanceTarget = distanceEnemy
+      end
+    end
+  end
+  return unitTarget
+end
+
+local hookTarget = nil
+--local function HookUtility(botBrain)
+--  local hook = skills.hook
+--  if hook and hook:CanActivate() then
+--    local unitTarget = DetermineHookTarget(hook)
+--    if unitTarget then
+--      hookTarget = unitTarget:GetPosition()
+--      return 76
+--      --local hookTargetHp = unitTarget:GetHealthPercent()
+--      --if hookTargetHp < 0.32 or (core.unitSelf:GetManaPercent() > 0.95 and hookTargetHp < 0.8) then
+--      --  return 90
+--      --end
+--    end
+--  end
+--  hookTarget = nil
+--  return 0
+--end
+--local function HookExecute(botBrain)
+--  if core.unitSelf:IsChanneling() then
+--    return
+--  end
+--  local hook = skills.hook
+--  if hook and hook:CanActivate() and hookTarget then
+--    return core.OrderAbilityPosition(botBrain, hook, hookTarget)
+--  end
+--  return false
+--end
+--local HookBehavior = {}
+--HookBehavior["Utility"] = HookUtility
+--HookBehavior["Execute"] = HookExecute
+--HookBehavior["Name"] = "Hooking"
+--tinsert(behaviorLib.tBehaviors, HookBehavior)
 
 -- Harass
 local function CustomHarassUtilityOverride(target)
     if object:IsPoolDiving() then
         return -500
     end
-    return 0
-    -- local nUtility = 0
+     local nUtility = 0
 
-    -- if skills.hook:CanActivate() then
-    --     nUtility = nUtility + 10
-    -- end
+    if core.unitSelf:IsChanneling() then
+        return 0
+    end
+     if skills.hook:CanActivate() then
+         nUtility = nUtility + 20
+         hookTarget = DetermineHookTarget(skills.hook) 
+         if hookTarget == target then
+	     nUtility = nUtility + 50
+		 if hookTarget:IsChanneling() then
+		     nUtility = nUtility + 50
+		 end
+         end
+     end
 
-    -- if skills.ulti:CanActivate() then
-    --     nUtility = nUtility + 40
-    -- end
+     if skills.ulti:CanActivate() then
+         nUtility = nUtility + 30
+         if target == DetermineUltiTarget(skills.ulti) then
+	     nUtility = nUtility + 50
+         end
+     end
 
-    -- return behaviorLib.CustomHarassUtility(target) + nUtility
+     return object.CustomHarassUtilityOld(target) + nUtility
 end
+object.CustomHarassUtilityOld = behaviorLib.CustomHarassUtility
 behaviorLib.CustomHarassUtility = CustomHarassUtilityOverride
 
 local itemPK = nil
@@ -251,13 +336,16 @@ local function HarassHeroExecuteOverride(botBrain)
     local itemGhostMarchers = core.itemGhostMarchers
 
     local ulti = skills.ulti
+    local hook = skills.hook
     local ultiRange = ulti and (ulti:GetRange() + core.GetExtraRange(unitSelf) + core.GetExtraRange(unitTarget)) or 0
 
-    local bUseUlti = true
 
-    if ulti and ulti:CanActivate() and bUseUlti and dist < ultiRange then
+    if ulti and ulti:CanActivate() and dist < ultiRange then
       bActionTaken = core.OrderAbilityEntity(botBrain, ulti, unitTarget)
-    elseif (ulti and ulti:CanActivate() and bUseUlti and dist > ultiRange) then
+      if not bActionTaken and hook and skills.hook:CanActivate() and hookTarget then
+        bActionTaken = core.OrderAbilityPosition(botBrain, hook, hookTarget)
+      end
+    elseif (ulti and ulti:CanActivate() and dist > ultiRange) then
       --move in when we want to ult
       local desiredPos = unitTarget:GetPosition()
 
@@ -277,6 +365,9 @@ local function HarassHeroExecuteOverride(botBrain)
     end
   end
 
+  if bActionTaken and hook and skills.hook:CanActivate() and hookTarget then
+    bActionTaken = core.OrderAbilityPosition(botBrain, hook, hookTarget)
+  end
   if not bActionTaken then
     return object.harassExecuteOld(botBrain)
   end
@@ -285,74 +376,6 @@ object.harassExecuteOld = behaviorLib.HarassHeroBehavior["Execute"]
 behaviorLib.HarassHeroBehavior["Execute"] = HarassHeroExecuteOverride
 
 
-local function DetermineHookTarget(hook)
-  local tLocalEnemies = core.CopyTable(core.localUnits["EnemyHeroes"])
-  local maxDistance = hook:GetRange()
-  local maxDistanceSq = maxDistance * maxDistance
-  local myPos = core.unitSelf:GetPosition()
-  local unitTarget = nil
-  local distanceTarget = 999999999
-  for _, unitEnemy in pairs(tLocalEnemies) do
-    local enemyPos = unitEnemy:GetPosition()
-    local distanceEnemy = Vector3.Distance2DSq(myPos, enemyPos)
-    if distanceEnemy < maxDistanceSq then
-      if distanceEnemy < distanceTarget and not creepsInWay(unitEnemy, false) then
-        unitTarget = unitEnemy
-        distanceTarget = distanceEnemy
-      end
-    end
-  end
-  return unitTarget
-end
-
-local function DetermineUltiTarget(ulti)
-  local tLocalEnemies = core.CopyTable(core.localUnits["EnemyHeroes"])
-  local maxDistance = ulti:GetRange()
-  local maxDistanceSq = maxDistance * maxDistance
-  local myPos = core.unitSelf:GetPosition()
-  local unitTarget = nil
-  local distanceTarget = 999999999
-  for _, unitEnemy in pairs(tLocalEnemies) do
-    local enemyPos = unitEnemy:GetPosition()
-    local distanceEnemy = Vector3.Distance2DSq(myPos, enemyPos)
-    if distanceEnemy < maxDistanceSq then
-      if distanceEnemy < distanceTarget and not creepsInWay(unitEnemy, false) then
-        unitTarget = unitEnemy
-        distanceTarget = distanceEnemy
-      end
-    end
-  end
-  return unitTarget
-end
-
-local hookTarget = nil
-local function HookUtility(botBrain)
-  local hook = skills.hook
-  if hook and hook:CanActivate() then
-    local unitTarget = DetermineHookTarget(hook)
-    if unitTarget then
-      hookTarget = unitTarget:GetPosition()
-      local hookTargetHp = unitTarget:GetHealthPercent()
-      if hookTargetHp < 0.32 or (core.unitSelf:GetManaPercent() > 0.95 and hookTargetHp < 0.8) then
-        return 90
-      end
-    end
-  end
-  hookTarget = nil
-  return 0
-end
-local function HookExecute(botBrain)
-  local hook = skills.hook
-  if hook and hook:CanActivate() and hookTarget then
-    return core.OrderAbilityPosition(botBrain, hook, hookTarget)
-  end
-  return false
-end
-local HookBehavior = {}
-HookBehavior["Utility"] = HookUtility
-HookBehavior["Execute"] = HookExecute
-HookBehavior["Name"] = "Hooking"
-tinsert(behaviorLib.tBehaviors, HookBehavior)
 
 local RotEnableBehavior = {}
 local function HasEnemyHeroesInRange(unit, range)
@@ -409,7 +432,8 @@ local function RotEnableUtility(botBrain)
       rotting = rotting + 100
     end
   end
-  return rotting
+  --return rotting
+  return Clamp(rotting, 0, 100)
   
 end
 local function RotEnableExecute(botBrain)
@@ -437,6 +461,7 @@ local function RotDisableUtility(botBrain)
   local hasEnemyHeroesClose = HasEnemyHeroesInRange(core.unitSelf, rotRange)
   local hasEnemyCreepsClose = HowManyEnemyCreepsInRange(core.unitSelf, rotRange)
   local rotting = 0
+  local hpVelo = core.unitSelf:GetHealthVelocity() 
   if rot:CanActivate() and hasEffect then
     rotting = 100
     if hasEnemyHeroesClose and hasEnemyCreepsClose > 2 then
@@ -445,8 +470,10 @@ local function RotDisableUtility(botBrain)
       rotting = rotting - 50
     elseif hasEnemyCreepsClose > 2 then
       rotting = rotting - 40
+    elseif hpVelo == 0 or core.unitSelf:IsChanneling()  then
+      rotting = rotting - 9001
     else
-      return 100
+      return Clamp(rotting, 0, 100)
     end
     rotting = rotting * core.unitSelf:GetHealthPercent() 
     --rotting = (100 - rotting)

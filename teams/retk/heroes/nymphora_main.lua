@@ -382,9 +382,10 @@ function HarassHeroExecuteOverride(botBrain)
 	if not bActionTaken then
 		local itemGreaves = core.GetItem("Item_PlatedGreaves")
 		if itemGreaves and itemGreaves:CanActivate() then
-			p(core.NumberElements(core.localUnits["AllyHeroes"]))
-			if core.NumberElements(core.localUnits["AllyHeroes"]) ~= 0 and core.NumberElements(core.localUnits["EnemyHeroes"]) ~= 0 then
+			--p(core.NumberElements(core.localUnits["AllyHeroes"]))
+			if (core.NumberElements(core.localUnits["AllyHeroes"]) ~= 0 and core.NumberElements(core.localUnits["EnemyHeroes"])) or core.NumberElements(core.localUnits["AllyCreeps"]) > 3 then
 				botBrain:OrderItem(itemGreaves.object, "None")
+				--p(core.NumberElements(core.localUnits["AllyCreeps"]))
 				bActionTaken = true
 			end
 		end

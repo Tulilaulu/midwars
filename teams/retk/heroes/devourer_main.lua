@@ -182,6 +182,52 @@ end
 object.oncombateventOld = object.oncombatevent
 object.oncombatevent = object.oncombateventOverride
 
+
+local function HasEnemyHeroesInRange(unit, range)
+  local enemyHeroes = core.CopyTable(core.localUnits["EnemyHeroes"])
+  local rangeSq = range * range
+  local myPos = unit:GetPosition()
+  for _, enemy in pairs(enemyHeroes) do
+    if Vector3.Distance2DSq(enemy:GetPosition(), myPos) < rangeSq then
+      return true
+    end
+  end
+  return false
+end
+
+local function HasMoreEnemyHeroesInRangeThanAllyHeroes(unit, range)
+  local enemyHeroes = core.CopyTable(core.localUnits["EnemyHeroes"])
+  local allyHeroes = core.CopyTable(core.localUnits["AllyHeroes"])
+  local allyHeroes = 0
+  local enemyHeroes = 0
+  local rangeSq = range * range
+  local myPos = unit:GetPosition()
+  for _, ally in pairs(allyHeroes) do
+    if Vector3.Distance2DSq(ally:GetPosition(), myPos) < rangeSq then
+      allyHeroes = allyHeroes + 1
+    end
+  end
+  for _, enemy in pairs(enemyHeroes) do
+    if Vector3.Distance2DSq(enemy:GetPosition(), myPos) < rangeSq then
+      enemyHeroes = enemyHeroes + 1
+    end
+  end
+  return enemyHeroes >= allyHeroes
+end
+local function HowManyEnemyCreepsInRange(unit, range)
+  local enemyCreeps = core.CopyTable(core.localUnits["EnemyCreeps"])
+  local rangeSq = range * range
+  local myPos = unit:GetPosition()
+  local creeps = 0
+  for _, enemy in pairs(enemyCreeps) do
+    if Vector3.Distance2DSq(enemy:GetPosition(), myPos) < rangeSq then
+      creeps = creeps + 1
+    end
+  end
+  return creeps
+end
+
+
 local function DetermineUltiTarget(ulti)
   local tLocalEnemies = core.localUnits["EnemyHeroes"]
   local maxDistance = ulti:GetRange()
@@ -270,6 +316,7 @@ local function CustomHarassUtilityOverride(target)
          hookTarget = DetermineHookTarget(skills.hook) 
          if hookTarget == target then
 	     nUtility = nUtility + 50
+	     p("I should hook now!")
 		 if hookTarget:IsChanneling() then
 		     nUtility = nUtility + 50
 		 end
@@ -315,6 +362,22 @@ end
 core.FindItems = FindItemsFn
 
 local function HarassHeroExecuteOverride(botBrain)
+  local rot = skills.rot
+  local rotRange = rot:GetTargetRadius()
+  local hasEffect = core.unitSelf:HasState("State_Devourer_Ability2_Self")
+  local hasEnemyHeroesClose = HasEnemyHeroesInRange(core.unitSelf, rotRange)
+  local hasEnemyCreepsClose = HowManyEnemyCreepsInRange(core.unitSelf, rotRange)
+  local rotting = false 
+  if rot:CanActivate() and not hasEffect then
+    if hasEnemyHeroesClose or hasEnemyCreepsClose > 2 or core.unitSelf:IsChanneling() then
+      rotting = true
+    end
+  end
+  if rotting then
+    return core.OrderAbility(botBrain, rot)
+  end
+
+
   local unitTarget = behaviorLib.heroTarget
   if unitTarget == nil or not unitTarget:IsValid() then
     return false --can not execute, move on to the next behavior
@@ -338,14 +401,18 @@ local function HarassHeroExecuteOverride(botBrain)
     local ulti = skills.ulti
     local hook = skills.hook
     local ultiRange = ulti and (ulti:GetRange() + core.GetExtraRange(unitSelf) + core.GetExtraRange(unitTarget)) or 0
-
+    local hookRange = hook and (hook:GetRange()) or 0
 
     if ulti and ulti:CanActivate() and dist < ultiRange then
       bActionTaken = core.OrderAbilityEntity(botBrain, ulti, unitTarget)
       if not bActionTaken and hook and skills.hook:CanActivate() and hookTarget then
         bActionTaken = core.OrderAbilityPosition(botBrain, hook, hookTarget)
       end
-    elseif (ulti and ulti:CanActivate() and dist > ultiRange) then
+    end
+    if hook and hook:CanActivate() and dist < hookRange and hookTarget and hookTarget == unitTarget then
+      bActionTaken = core.OrderAbilityPosition(botBrain, hook, hookTarget:GetPosition())
+    end
+    if (ulti and ulti:CanActivate() and dist > ultiRange) and bActionTaken then
       --move in when we want to ult
       local desiredPos = unitTarget:GetPosition()
 
@@ -365,7 +432,7 @@ local function HarassHeroExecuteOverride(botBrain)
     end
   end
 
-  if bActionTaken and hook and skills.hook:CanActivate() and hookTarget then
+  if not bActionTaken and hook and skills.hook:CanActivate() and hookTarget then
     bActionTaken = core.OrderAbilityPosition(botBrain, hook, hookTarget)
   end
   if not bActionTaken then
@@ -378,29 +445,6 @@ behaviorLib.HarassHeroBehavior["Execute"] = HarassHeroExecuteOverride
 
 
 local RotEnableBehavior = {}
-local function HasEnemyHeroesInRange(unit, range)
-  local enemyHeroes = core.CopyTable(core.localUnits["EnemyHeroes"])
-  local rangeSq = range * range
-  local myPos = unit:GetPosition()
-  for _, enemy in pairs(enemyHeroes) do
-    if Vector3.Distance2DSq(enemy:GetPosition(), myPos) < rangeSq then
-      return true
-    end
-  end
-  return false
-end
-local function HowManyEnemyCreepsInRange(unit, range)
-  local enemyCreeps = core.CopyTable(core.localUnits["EnemyCreeps"])
-  local rangeSq = range * range
-  local myPos = unit:GetPosition()
-  local creeps = 0
-  for _, enemy in pairs(enemyCreeps) do
-    if Vector3.Distance2DSq(enemy:GetPosition(), myPos) < rangeSq then
-      creeps = creeps + 1
-    end
-  end
-  return creeps
-end
 local ultiTarget = nil
 local function RotEnableUtility(botBrain)
   local rot = skills.rot
@@ -422,7 +466,7 @@ local function RotEnableUtility(botBrain)
   end
   if rot:CanActivate() and not hasEffect then
     if hasEnemyHeroesClose then
-      rotting = rotting + 50
+      rotting = rotting + 94
     end
     if hasEnemyCreepsClose > 2 then
       rotting = rotting + 50
@@ -444,7 +488,7 @@ local function RotEnableExecute(botBrain)
   local ulti = skills.ulti
   if ulti and ulti:CanActivate() then
     ultiTarget = DetermineUltiTarget(ulti)
-    core.OrderAbilityEntity(botBrain, ulti, ultiTarget)
+    return core.OrderAbilityEntity(botBrain, ulti, ultiTarget)
   end
   return false
 end
@@ -464,18 +508,18 @@ local function RotDisableUtility(botBrain)
   local hpVelo = core.unitSelf:GetHealthVelocity() 
   if rot:CanActivate() and hasEffect then
     rotting = 100
-    if hasEnemyHeroesClose and hasEnemyCreepsClose > 2 then
-      rotting = rotting - 90
+    if hasEnemyHeroesClose or hasEnemyCreepsClose > 2 then
+      rotting = rotting - 100
     elseif hasEnemyHeroesClose then
-      rotting = rotting - 50
+      rotting = rotting - 100
     elseif hasEnemyCreepsClose > 2 then
-      rotting = rotting - 40
-    elseif hpVelo == 0 or core.unitSelf:IsChanneling()  then
+      rotting = rotting - 97
+    elseif hpVelo >= 0 or core.unitSelf:IsChanneling()  then
       rotting = rotting - 9001
     else
       return Clamp(rotting, 0, 100)
     end
-    rotting = rotting * core.unitSelf:GetHealthPercent() 
+--    rotting = rotting * core.unitSelf:GetHealthPercent() 
     --rotting = (100 - rotting)
     rotting = Clamp(rotting, 0, 100)
   end
@@ -497,7 +541,9 @@ local BarbedUseBehavior = {}
 local function BarbedUseUtility(botBrain)
   local hpVelo = core.unitSelf:GetHealthVelocity() 
   if itemBarbed and itemBarbed:CanActivate() and hpVelo < -200 then
-    p(hpVelo)
+    if hpVelo < -200 or HasMoreEnemyHeroesInRangeThanAllyHeroes(core.self, 300) then
+      return 93
+    end
     return 93
   end
   return 0

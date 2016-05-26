@@ -924,8 +924,8 @@ object.nMaxGroupWaitTime = core.SToMS(3)
 object.nGroupWaitTime = nil
 
 function object:GroupAndPushLogic()
-	local bDebugEchos = true
-	local bDebugLines = true
+	local bDebugEchos = false
+	local bDebugLines = false
 	
 	local nCurrentMatchTime = HoN.GetMatchTime()
 	local nCurrentGameTime = HoN.GetGameTime()

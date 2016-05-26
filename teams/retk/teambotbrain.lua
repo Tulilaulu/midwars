@@ -905,12 +905,11 @@ end
 
 ---- Group-and-push logic ----
 --Note: all times in match time
-object.nPushIntervalMin = core.MinToMS(0.05)
-object.nPushIntervalMax = core.MinToMS(0.05)
+object.nPushIntervalMin = core.MinToMS(3)
+object.nPushIntervalMax = core.MinToMS(6)
 
 -- Time until the first push
--- object.nNextPushTime = core.MinToMS(7) + core.RandomReal(0, object.nPushIntervalMax - object.nPushIntervalMin) 
-object.nNextPushTime = core.MinToMS(1) -- + core.RandomReal(0, object.nPushIntervalMax - object.nPushIntervalMin) 
+object.nNextPushTime = core.MinToMS(7) + core.RandomReal(0, object.nPushIntervalMax - object.nPushIntervalMin) 
 
 object.nPushStartTime = 0
 object.unitPushTarget = nil
@@ -924,20 +923,18 @@ object.nMaxGroupWaitTime = core.SToMS(25)
 object.nGroupWaitTime = nil
 
 function object:GroupAndPushLogic()
-	local bDebugEchos = true
+	local bDebugEchos = false
 	local bDebugLines = false
 	
 	local nCurrentMatchTime = HoN.GetMatchTime()
 	local nCurrentGameTime = HoN.GetGameTime()
-	local nCurrentTime = HoN.GetGameTime()
-	BotEcho("!!!")
 	
 	if bDebugEchos then BotEcho('GroupAndPushLogic: ') end
 	
 	if self.nPushState == STATE_IDLE then
 		if bDebugEchos then BotEcho(format('IDLE - nCurrentMatchTime: %d  nNextPushTime: %d', nCurrentMatchTime, self.nNextPushTime)) end
 		
-		if object.plzGroup and nCurrentMatchTime > self.nNextPushTime then
+		if nCurrentMatchTime > self.nNextPushTime then
 			--determine target lane
 			local sLane = nil
 			local tLaneUnits = {}

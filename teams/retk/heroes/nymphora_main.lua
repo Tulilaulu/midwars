@@ -75,6 +75,8 @@ behaviorLib.LateItems =
 	{"Item_Summon", "Item_BehemothsHeart"} --Intelligence7 is Staff of the Master
 
 
+behaviorLib.printShopDebug = false
+
 -- Thresholds --
 object.nStunThreshold = 35
 object.nHealThreshold = 35

@@ -3597,6 +3597,54 @@ Current algorithm:
 
 	behaviorLib.nextBuyTime = HoN.GetGameTime() + behaviorLib.buyInterval
 
+	local tInventory = core.unitSelf:GetInventory(true)
+	local freeSlot = nil
+	for slot = 1, 6, 1 do
+	    if not tInventory[slot] then
+	        freeSlot = slot
+	        break
+            end
+        end
+        local birdHasStuff = false
+        local birdHasRecipe = false
+	for slot = 7, 12, 1 do
+	    if tInventory[slot]  then
+	        birdHasStuff = true
+	        if tInventory[slot]:IsRecipe() then
+                    birdHasRecipe = true
+                    break
+                end
+            end
+        end
+
+	if behaviorLib.foundBird then
+	    if freeSlot ~= nil or birdHasRecipe or not birdHasStuff then
+                -- core.AllChat("Not shopping - courier still exists...")
+                behaviorLib.finishedBuying = true
+            else
+                core.AllChat("Courier is bringing me stuff but I have no space :( Selling stuff.")
+                behaviorLib.SellLowestItems(botBrain, 1)
+            end
+	    return
+        end
+
+        if HoN:GetMatchTime() > 0 then
+            for slot = 7, 12, 1 do
+                local item = tInventory[slot]
+                if item then
+                    local msg = "My inventory is broken: " .. item:GetName() .. " is in stash slot " .. tostring(slot)
+                    if core.unitSelf:CanAccessStash() then
+                        local ret = nil -- core.unitSelf:SwapItems(slot, freeSlot)
+                        msg = msg .. ". Would swap slots" .. tostring(slot) .. " and " .. tostring(freeSlot)
+                    else
+                        msg = msg .. "... and I can't move it from stash :("
+                    end
+                    core.AllChat(msg)
+                    return
+                end
+            end
+        end
+
 	--Determine where in the pattern we are (mostly for reloads)
 	if behaviorLib.buyState == behaviorLib.BuyStateUnknown then
 		behaviorLib.DetermineBuyState(botBrain)

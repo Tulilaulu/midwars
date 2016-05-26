@@ -65,9 +65,9 @@ core.tLanePreferences = {Jungle = 0, Mid = 5, ShortSolo = 4, LongSolo = 2, Short
 --      Valk items
 ----------------------------------
 behaviorLib.StartingItems =
-	{"Item_RunesOfTheBlight", "2 Item_MinorTotem", "Item_ManaBattery", "Item_DuckBoots" }
+	{"2 Item_MinorTotem", "Item_ManaBattery", "Item_DuckBoots" }
 behaviorLib.LaneItems =
-	{ "Item_PowerSupply", "Item_Marchers", "Item_Soulscream", "Item_GlovesOfHaste", "Item_Steamboots" }-- , "Item_MajorTotem", "Item_Energizer" } -- Items: Marchers,Helm Of The Black Legion, upg Marchers to Plated Greaves
+	{ "Item_PowerSupply", "Item_Marchers", "Item_Soulscream", "Item_GlovesOfHaste", "Item_Steamboots", "Item_MajorTotem", "Item_Energizer" } -- Items: Marchers,Helm Of The Black Legion, upg Marchers to Plated Greaves
 behaviorLib.MidItems =
 	{"Item_Voltstone", "Item_Warhammer", "Item_Pierce", "2 Item_Warpcleft", "Item_ArclightCrown", "Item_Wingbow" } -- Warhammer -> Shieldbreaker, Item_Wingbow NOT Winbow but the +25 agi item
 behaviorLib.LateItems =

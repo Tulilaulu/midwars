@@ -65,7 +65,7 @@ core.tLanePreferences = {Jungle = 0, Mid = 5, ShortSolo = 4, LongSolo = 2, Short
 --      Valk items
 ----------------------------------
 behaviorLib.StartingItems =
-	{"2 Item_MinorTotem", "Item_ManaBattery", "Item_DuckBoots" }
+	{"Item_MerricksBounty", "2 Item_MinorTotem", "Item_ManaBattery", "Item_DuckBoots" }
 behaviorLib.LaneItems =
 	{ "Item_PowerSupply", "Item_Marchers", "Item_Soulscream", "Item_GlovesOfHaste", "Item_Steamboots", "Item_MajorTotem", "Item_Energizer" } -- Items: Marchers,Helm Of The Black Legion, upg Marchers to Plated Greaves
 behaviorLib.MidItems =

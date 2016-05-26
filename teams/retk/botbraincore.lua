@@ -949,11 +949,12 @@ function core.FindItems(botBrain)
 	
 	core.itemGhostMarchers = core.ValidateItem(core.itemGhostMarchers)
 	core.itemHatchet = core.ValidateItem(core.itemHatchet)
-	core.itemRoT = core.ValidateItem(core.itemRoT)
+	--core.itemRoT = core.ValidateItem(core.itemRoT)
 		
 	local unitSelf = core.unitSelf
 	
-	if (core.itemGhostMarchers and core.itemHatchet and core.itemRoT) then
+	if (core.itemGhostMarchers and core.itemHatchet) then
+	--if (core.itemGhostMarchers and core.itemHatchet and core.itemRoT) then
 		return
 	end	
 	
@@ -980,18 +981,18 @@ function core.FindItems(botBrain)
 					--Echo("Saving hatchet")
 				end
 				
-				if core.itemRoT == nil and curItem:GetName() == "Item_ManaRegen3" then
-					core.itemRoT = core.WrapInTable(curItem)
-					core.itemRoT.bHeroesOnly = (curItem:GetActiveModifierKey() == "ringoftheteacher_heroes")
-					core.itemRoT.nNextUpdateTime = 0
-					core.itemRoT.Update = function() 
-						local nCurrentTime = HoN.GetGameTime()
-						if nCurrentTime > core.itemRoT.nNextUpdateTime then
-							core.itemRoT.bHeroesOnly = (core.itemRoT:GetActiveModifierKey() == "ringoftheteacher_heroes")
-							core.itemRoT.nNextUpdateTime = nCurrentTime + 800
-						end
-					end
-				end
+			--	if core.itemRoT == nil and curItem:GetName() == "Item_ManaRegen3" then
+			--		core.itemRoT = core.WrapInTable(curItem)
+			--		core.itemRoT.bHeroesOnly = (curItem:GetActiveModifierKey() == "ringoftheteacher_heroes")
+			--		core.itemRoT.nNextUpdateTime = 0
+			--		core.itemRoT.Update = function() 
+			--			local nCurrentTime = HoN.GetGameTime()
+			--			if nCurrentTime > core.itemRoT.nNextUpdateTime then
+			--				core.itemRoT.bHeroesOnly = (core.itemRoT:GetActiveModifierKey() == "ringoftheteacher_heroes")
+			--				core.itemRoT.nNextUpdateTime = nCurrentTime + 800
+			--			end
+			--		end
+			--	end
 			end
 		end
 	end

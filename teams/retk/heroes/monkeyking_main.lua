@@ -66,7 +66,7 @@ core.tLanePreferences = {Jungle = 0, Mid = 5, ShortSolo = 0, LongSolo = 0, Short
 -- {PowerSupply, PhaseBoots, Bulwark, Icon} -> {PowerSupply, PhaseBoots, Bulwark, Icon, Platemail} -> {PowerSupply, PhaseBoots, Bulwark, Icon, Platemail, Warpcleft}
 -- Blue boots, Bulwark, Icon
 behaviorLib.StartingItems =
-	{"2 Item_MinorTotem", "Item_ManaBattery", "Item_GuardianRing" }
+	{"Item_MerricksBounty", "2 Item_MinorTotem", "Item_ManaBattery", "Item_GuardianRing" }
 behaviorLib.LaneItems =
 	{ "Item_PowerSupply", "Item_Marchers", "Item_Punchdagger", "Item_EnhancedMarchers"} -- Items: power supply, ghost marchers
 behaviorLib.MidItems =

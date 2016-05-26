@@ -65,14 +65,14 @@ BotEcho('loading nymphora_main...')
 ---------------
 core.tLanePreferences = {Jungle = 0, Mid = 1, ShortSolo = 1, LongSolo = 1, ShortSupport = 5, LongSupport = 5, ShortCarry = 1, LongCarry = 1}
 
-behaviorLib.StartingItems =
-	{"Item_MerricksBounty", "Item_TrinketOfRestoration", "Item_MinorTotem", "Item_CrushingClaws"}
+--behaviorLib.StartingItems =	{"Item_MerricksBounty", "Item_TrinketOfRestoration", "Item_MinorTotem", "Item_CrushingClaws"}
+behaviorLib.StartingItems = {"Item_MerricksBounty", "Item_ManaBattery", "Item_GuardianRing", "Item_MinorTotem", "Item_ManaRegen3"}  --Item: Bounty, mana battery, guardian ring->ring of the teacher, minor totem
 behaviorLib.LaneItems =
-	{"Item_Marchers", "Item_MysticPotpourri", "Item_PlatedGreaves"}
+	{"Item_Marchers", "Item_TrinketOfRestoration", "Item_MysticPotpourri", "Item_MysticVestments", "Item_NomesWisdom", "Item_MinorTotem",  "Item_PlatedGreaves", "Item_Strength5"} --boots, trinket -> refreshing ornament, push boots, Fortified Bracer
 behaviorLib.MidItems =
-	{"Item_Astrolabe", "Item_Beastheart", "Item_Glowstone", "Item_HealthMana2", "Item_AcolytesStaff", "Item_Morph"}
+	{"Item_Astrolabe", "Item_Beastheart", "Item_Glowstone", "Item_HealthMana2", "Item_Morph"}
 behaviorLib.LateItems =
-	{"Item_Summon", "Item_AxeOfTheMalphai", "Item_BehemothsHeart"} --Intelligence7 is Staff of the Master
+	{"Item_AxeOfTheMalphai", "Item_BehemothsHeart"} 
 
 
 behaviorLib.printShopDebug = false
@@ -189,29 +189,32 @@ function object:SkillBuild()
 
 	for i = 0, unitSelf:GetAbilityPointsAvailable(), 1 do
 		local bAbilityLeveled = false
-		if skills.teleport:CanLevelUp() then
-			skills.teleport:LevelUp()
-			bAbilityLeveled = true
-		else
-			if (self.nHealNeeded > 1 and skills.heal:CanLevelUp()) or (self.nManaNeeded > 1 and skills.mana:CanLevelUp()) or
-				(not skills.stun:CanLevelUp() and (skills.heal:CanLevelUp() or skills.mana:CanLevelUp())) then
-				if self.nHealNeeded >= self.nManaNeeded and skills.heal:CanLevelUp() or not skills.mana:CanLevelUp() then
-					skills.heal:LevelUp()
-					self.nHealNeeded = self.nHealNeeded - 1
-					--self.nHealNeeded = 0
-				else
-					skills.mana:LevelUp()
-					self.nManaNeeded = self.nManaNeeded - 1
-					--self.nManaNeeded = 0
-				end
-				bAbilityLeveled = true
-			elseif skills.stun:CanLevelUp() then
-				skills.stun:LevelUp()
-				bAbilityLeveled = true
+		--if skills.teleport:CanLevelUp() then
+		--	skills.teleport:LevelUp()
+		--	bAbilityLeveled = true
+		--else
+		if (self.nHealNeeded > 1 and skills.heal:CanLevelUp()) or (self.nManaNeeded > 1 and skills.mana:CanLevelUp()) or
+			(not skills.stun:CanLevelUp() and (skills.heal:CanLevelUp() or skills.mana:CanLevelUp())) then
+			if self.nHealNeeded >= self.nManaNeeded and skills.heal:CanLevelUp() or not skills.mana:CanLevelUp() then
+				skills.heal:LevelUp()
+				self.nHealNeeded = self.nHealNeeded - 1
+				--self.nHealNeeded = 0
+			else
+				skills.mana:LevelUp()
+				self.nManaNeeded = self.nManaNeeded - 1
+				--self.nManaNeeded = 0
 			end
+			bAbilityLeveled = true
+		elseif skills.stun:CanLevelUp() then
+			skills.stun:LevelUp()
+			bAbilityLeveled = true
 		end
 		if not bAbilityLeveled then
 			unitSelf:GetAbility(4):LevelUp()
+			bAbilityLeveled = true
+		end
+		if not bAbilityLeveled and skills.teleport:CanLevelUp() then
+			skills.teleport:LevelUp()
 		end
 	end
 end

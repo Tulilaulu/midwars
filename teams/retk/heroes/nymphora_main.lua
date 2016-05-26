@@ -378,7 +378,17 @@ function HarassHeroExecuteOverride(botBrain)
 			end
 		end
 	end
-
+	--- Plated Greaves use here
+	if not bActionTaken then
+		local itemGreaves = core.GetItem("Item_PlatedGreaves")
+		if itemGreaves and itemGreaves:CanActivate() then
+			p(core.NumberElements(core.localUnits["AllyHeroes"]))
+			if core.NumberElements(core.localUnits["AllyHeroes"]) ~= 0 and core.NumberElements(core.localUnits["EnemyHeroes"]) ~= 0 then
+				botBrain:OrderItem(itemGreaves.object, "None")
+				bActionTaken = true
+			end
+		end
+	end
 	if not bActionTaken then
 		return object.harassExecuteOld(botBrain)
 	end

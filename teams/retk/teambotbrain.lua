@@ -21,9 +21,10 @@ object.logger.bVerboseLog = false
 object.core 		= {}
 object.metadata 	= {}
 
-runfile "bots/core.lua"
+runfile "bots/teams/retk/core.lua"
 runfile "bots/metadata.lua"
 runfile "bots/jungleLib.lua"
+runfile "bots/teams/retk/utils.lua"
 
 local core, metadata = object.core, object.metadata
 
@@ -38,7 +39,7 @@ local Clamp = core.Clamp
 local jungleLib = object.jungleLib
 if jungleLib == nil then BotEcho("jungle lib is nil!") end
 
-BotEcho('Loading teambotbrain...')
+BotEcho('Loading teambotbrain... (RETK edition)')
 
 object.tAllyHeroes = {}
 object.tEnemyHeroes = {}
@@ -94,6 +95,7 @@ object.laneReassessInterval = core.MinToMS(3) --regular interval to check for pl
 local STATE_IDLE		= 0
 local STATE_GROUPING	= 1
 local STATE_PUSHING		= 2
+local stateStrings = { [0] = "Idle", [1] = "Grouping", [2] = "Pushing" }
 object.nPushState = STATE_IDLE
 
 -- To track runes
@@ -142,13 +144,13 @@ function object:onthink(tGameVariables)
 			core.nDifficulty = core.tGameVariables.nDifficulty or core.nEASY_DIFFICULTY
 			
 			--[Tutorial] Hellbourne heroes don't group up to push and Legion waits longer to push
-			if core.bIsTutorial or #tMapLanes == 1 then
-				if core.myTeam == HoN.GetHellbourneTeam() then
-					object.bGroupAndPush = false
-				else
-					object.nNextPushTime = core.MinToMS(12)
-				end
-			end
+			-- if core.bIsTutorial or #tMapLanes == 1 then
+			-- 	if core.myTeam == HoN.GetHellbourneTeam() then
+			-- 		object.bGroupAndPush = false
+			-- 	else
+			-- 		object.nNextPushTime = core.MinToMS(12)
+			-- 	end
+			-- end
 			
 			--[Difficulty: Easy] Bots don't defend
 			if core.nDifficulty == core.nEASY_DIFFICULTY or core.bIsTutorial then
@@ -158,13 +160,13 @@ function object:onthink(tGameVariables)
 
 			local bEnemyTeamHasHuman = core.EnemyTeamHasHuman()
 
-			if core.nDifficulty == core.nEASY_DIFFICULTY and bEnemyTeamHasHuman then
-				object.bGroupAndPush = false
-			end
+			--if core.nDifficulty == core.nEASY_DIFFICULTY and bEnemyTeamHasHuman then
+			--	object.bGroupAndPush = false
+			--end
 
-			if core.nDifficulty == core.nEASY_DIFFICULTY and bEnemyTeamHasHuman then
-				object.bDefense = false
-			end
+			--if core.nDifficulty == core.nEASY_DIFFICULTY and bEnemyTeamHasHuman then
+			--	object.bDefense = false
+			--end
 
 			if core.tGameVariables.sMapName == "midwars" then
 				self.runes = {{vecLocation = Vector3.Create(7064, 8190), unit=nil, bPicked = true, bBetter=true}}
@@ -241,6 +243,7 @@ function object:onthink(tGameVariables)
 		end
 	StopProfile()
 	
+        BotEcho("RetkTeamBotBrain - state: " .. stateStrings[self.nPushState])
 	StartProfile('Group and Push Logic')
 	if self.bGroupAndPush ~= false then
 		self:GroupAndPushLogic()
@@ -902,11 +905,12 @@ end
 
 ---- Group-and-push logic ----
 --Note: all times in match time
-object.nPushIntervalMin = core.MinToMS(3)
-object.nPushIntervalMax = core.MinToMS(6)
+object.nPushIntervalMin = core.MinToMS(0.05)
+object.nPushIntervalMax = core.MinToMS(0.05)
 
 -- Time until the first push
-object.nNextPushTime = core.MinToMS(7) + core.RandomReal(0, object.nPushIntervalMax - object.nPushIntervalMin) 
+-- object.nNextPushTime = core.MinToMS(7) + core.RandomReal(0, object.nPushIntervalMax - object.nPushIntervalMin) 
+object.nNextPushTime = core.MinToMS(1) -- + core.RandomReal(0, object.nPushIntervalMax - object.nPushIntervalMin) 
 
 object.nPushStartTime = 0
 object.unitPushTarget = nil
@@ -920,18 +924,20 @@ object.nMaxGroupWaitTime = core.SToMS(25)
 object.nGroupWaitTime = nil
 
 function object:GroupAndPushLogic()
-	local bDebugEchos = false
+	local bDebugEchos = true
 	local bDebugLines = false
 	
 	local nCurrentMatchTime = HoN.GetMatchTime()
 	local nCurrentGameTime = HoN.GetGameTime()
+	local nCurrentTime = HoN.GetGameTime()
+	BotEcho("!!!")
 	
 	if bDebugEchos then BotEcho('GroupAndPushLogic: ') end
 	
 	if self.nPushState == STATE_IDLE then
 		if bDebugEchos then BotEcho(format('IDLE - nCurrentMatchTime: %d  nNextPushTime: %d', nCurrentMatchTime, self.nNextPushTime)) end
 		
-		if nCurrentMatchTime > self.nNextPushTime then
+		if object.plzGroup and nCurrentMatchTime > self.nNextPushTime then
 			--determine target lane
 			local sLane = nil
 			local tLaneUnits = {}

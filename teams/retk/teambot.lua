@@ -1,7 +1,7 @@
 local _G = getfenv(0)
 local object = _G.object
 
-runfile 'teams/retk/teambotbrain.lua'
+runfile 'bots/teams/retk/teambotbrain.lua'
 
 object.myName = 'RETK'
 
@@ -18,3 +18,5 @@ function object:onthinkOverride(tGameVariables)
 end
 object.onthinkOld = object.onthink
 object.onthink = object.onthinkOverride
+
+Echo("loaded retk teambot")

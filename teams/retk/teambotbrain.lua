@@ -243,7 +243,7 @@ function object:onthink(tGameVariables)
 		end
 	StopProfile()
 	
-        BotEcho("RetkTeamBotBrain - state: " .. stateStrings[self.nPushState])
+        -- BotEcho("RetkTeamBotBrain - state: " .. stateStrings[self.nPushState])
 	StartProfile('Group and Push Logic')
 	if self.bGroupAndPush ~= false then
 		self:GroupAndPushLogic()
@@ -914,23 +914,22 @@ object.nNextPushTime = core.MinToMS(1) -- + core.RandomReal(0, object.nPushInter
 
 object.nPushStartTime = 0
 object.unitPushTarget = nil
-object.unitRallyBuilding = nil
+object.unitRallyPosition = nil
 
 object.tArrivalEstimatePairs = {}
-object.nGroupUpRadius = 800
+object.nGroupUpRadius = 1100
 object.nGroupUpRadiusSq = object.nGroupUpRadius * object.nGroupUpRadius
 object.nGroupEstimateMul = 1.5
-object.nMaxGroupWaitTime = core.SToMS(25)
+object.nMaxGroupWaitTime = core.SToMS(3)
 object.nGroupWaitTime = nil
 
 function object:GroupAndPushLogic()
 	local bDebugEchos = true
-	local bDebugLines = false
+	local bDebugLines = true
 	
 	local nCurrentMatchTime = HoN.GetMatchTime()
 	local nCurrentGameTime = HoN.GetGameTime()
 	local nCurrentTime = HoN.GetGameTime()
-	BotEcho("!!!")
 	
 	if bDebugEchos then BotEcho('GroupAndPushLogic: ') end
 	
@@ -952,16 +951,17 @@ function object:GroupAndPushLogic()
 			self.unitPushTarget = unitTarget
 			
 			--calculate estimated time to arrive
-			local unitRallyBuilding = core.GetFurthestLaneTower(tLaneNodes, core.bTraverseForward, core.myTeam)
-			if unitRallyBuilding == nil then
-				unitRallyBuilding = core.allyMainBaseStructure
-			end
-			self.unitRallyBuilding = unitRallyBuilding
+			-- local unitRallyBuilding = core.GetFurthestLaneTower(tLaneNodes, core.bTraverseForward, core.myTeam)
+			-- if unitRallyBuilding == nil then
+			-- 	unitRallyBuilding = core.allyMainBaseStructure
+			-- end
+			-- self.unitRallyPosition = unitRallyBuilding:GetPosition()
+			self.unitRallyPosition = self.GetRallyPosition()
 			
 			--invalidate our wait timeout
 			self.nGroupWaitTime = nil
 			
-			local vecTargetPos = unitRallyBuilding:GetPosition()
+			local vecTargetPos = self.unitRallyPosition
 			for key, hero in pairs(tLaneUnits) do
 				if hero:IsBotControlled() then
 					local nWalkTime = core.TimeToPosition(vecTargetPos, hero:GetPosition(), hero:GetMoveSpeed())
@@ -982,17 +982,18 @@ function object:GroupAndPushLogic()
 			if bDebugEchos then BotEcho("PUSHING - Grouping up!") end
 		end
 	elseif self.nPushState == STATE_GROUPING then
-		if not self.unitRallyBuilding or not self.unitRallyBuilding:IsValid() then
+                self.unitRallyPosition = self.GetRallyPosition()
+		if not self.unitRallyPosition then
 			self.nNextPushTime = nCurrentMatchTime
 			self.nPushState = STATE_IDLE
 		elseif self.nGroupWaitTime ~= nil and nCurrentGameTime >= self.nGroupWaitTime then
 			if bDebugEchos then BotEcho("GROUPING - We've waited long enough... Time to push!") end
-			self.nPushState = STATE_PUSHING
+			self.nPushState = STATE_IDLE
 		else
-			if bDebugEchos then BotEcho('GROUPING - checking if everyone is at the '..self.unitRallyBuilding:GetTypeName()) end
+			if bDebugEchos then BotEcho('GROUPING - checking if everyone is at the rally position') end
 			local bAllHere = true
 			local bAnyHere = false
-			local vecRallyPosition = self.unitRallyBuilding:GetPosition()
+			local vecRallyPosition = self.unitRallyPosition
 			for key, tPair in pairs(self.tArrivalEstimatePairs) do
 				local unit = tPair[1]
 				local nTime = tPair[2]
@@ -1021,7 +1022,8 @@ function object:GroupAndPushLogic()
 			
 			if bAllHere then
 				if bDebugEchos then BotEcho("GROUPING - everyone is here! Time to push!") end
-				self.nPushState = STATE_PUSHING
+				-- self.nPushState = STATE_PUSHING
+				self.nPushState = STATE_IDLE
 			elseif bAnyHere and self.nGroupWaitTime == nil then
 				self.nGroupWaitTime = nCurrentGameTime + self.nMaxGroupWaitTime
 			end
@@ -1053,8 +1055,8 @@ function object:GroupAndPushLogic()
 	end
 	
 	if bDebugLines then
-		if self.unitRallyBuilding then
-			core.DrawXPosition(self.unitRallyBuilding:GetPosition(), 'yellow')
+		if self.unitRallyPosition then
+			core.DrawXPosition(self.unitRallyPosition, 'yellow')
 		end
 		if self.unitPushTarget then
 			core.DrawXPosition(self.unitPushTarget:GetPosition(), 'red')
@@ -1155,8 +1157,8 @@ function object:PushUtility()
 end
 
 function object:GetGroupRallyPoint()
-	if self.unitRallyBuilding ~= nil then
-		return self.unitRallyBuilding:GetPosition()
+	if self.unitRallyPosition ~= nil then
+		return self.unitRallyPosition
 	end
 	
 	return nil

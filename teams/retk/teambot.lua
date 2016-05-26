@@ -101,6 +101,16 @@ function object:ClusterHeroes()
     return cluster, center
 end
 
+function object:GetRallyPosition()
+    local aliveHeroes = {}
+    for k, unit in pairs(object.tAllyHeroes) do
+        if unit:IsAlive() then
+            aliveHeroes[k] = unit
+        end
+    end
+    return core.FindCenterOfMass(aliveHeroes)
+end
+
 ------------------------------------------------------
 --            onthink override                      --
 -- Called every bot tick, custom onthink code here  --
@@ -113,9 +123,9 @@ function object:onthinkOverride(tGameVariables)
     drawLine(legionLineA, legionLineB)
     drawLine(hellbourneLineA, hellbourneLineB)
     local cluster, center = object:ClusterHeroes()
-    local shouldGroup = false
+    local nearEnemies = false
     if InEnemyTerritory(center) then
-        shouldGroup = true
+        nearEnemies = true
         drawCross(center, 'red')
     else
         drawCross(center, 'yellow')
@@ -136,12 +146,18 @@ function object:onthinkOverride(tGameVariables)
             enemyCount = enemyCount + 1
         end
     end
-    Echo("Own cluster: " .. ownCount .. ", enemies alive: " .. enemyCount .. ", in enemy territory: " .. tostring(shouldGroup))
-    if shouldGroup and ownCount < enemyCount then
-        Echo("grouping")
+    --Echo("Own cluster: " .. ownCount .. ", enemies alive: " .. enemyCount .. ", in enemy territory: " .. tostring(nearEnemies) .. ", group: " .. tostring(shouldGroup))
+    local shouldGroup = nearEnemies and ownCount < enemyCount
+    object.ourCluster = cluster
+    object.ourClusterCount = ownCount
+    object.ourClusterCenter = center
+    object.ourClusterInEnemyTerritory = nearEnemies
+    object.enemiesAlive = enemyCount
+    if shouldGroup then
+        -- Echo("grouping")
         object.plzGroup = true
     else
-        Echo("not grouping")
+        -- Echo("not grouping")
         object.plzGroup = false
     end
 end

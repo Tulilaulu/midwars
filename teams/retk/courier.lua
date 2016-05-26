@@ -10,6 +10,7 @@ local ceil, floor, pi, tan, atan, atan2, abs, cos, sin, acos, max, random
 
 local BotEcho, VerboseLog, BotLog = core.BotEcho, core.VerboseLog, core.BotLog
 local Clamp = core.Clamp
+local courierFound = -999999
 
 local function CourierUtility(botBrain)
     if HoN:GetMatchTime() <= 0 then
@@ -21,17 +22,32 @@ local function CourierUtility(botBrain)
         if unit:GetTypeName() == "Pet_AutomatedCourier" and unit:GetTeam() == core.unitSelf:GetTeam() and unit:GetOwnerPlayerID() == core.unitSelf:GetOwnerPlayerID() then
             drawCross(unit:GetPosition(), "red")
             behaviorLib.foundBird = true
+            if courierFound < 0 then
+                courierFound = HoN:GetMatchTime()
+            end
             break
         end
     end
 
-    if not behaviorLib.foundBird and skills.courier:CanActivate() then
+    if not behaviorLib.foundBird then
+        courierFound = -99999
+    end
+
+    local bugged = false
+    if courierFound > 0 and HoN:GetMatchTime() - courierFound > 40000 then
+        bugged = true
+        core.AllChat("Courier is bugged :(")
+    end
+
+
+    if bugged or (not behaviorLib.foundBird and skills.courier:CanActivate()) then
         return 100
     end
     return 0
 end
 
 local function CourierExecute(botBrain)
+    courierFound = -99999
     return core.OrderAbility(botBrain, skills.courier)
 end
 

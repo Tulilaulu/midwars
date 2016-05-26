@@ -71,7 +71,7 @@ behaviorLib.LaneItems =
 behaviorLib.MidItems =
 	{"Item_Voltstone", "Item_Warhammer", "Item_Pierce", "2 Item_Warpcleft", "Item_ArclightCrown", "Item_Wingbow" } -- Warhammer -> Shieldbreaker, Item_Wingbow NOT Winbow but the +25 agi item
 behaviorLib.LateItems =
-	{"Item_Pierce 3", "Item_Evasion"} -- Item_Evasion == Real Wingbow
+	{"Item_Pierce 3", "Item_Evasion", "Item_AxeOfTheMalphai", "Item_BehemothsHeart"} -- Item_Evasion == Real Wingbow
 
 behaviorLib.healAtWellHealthFactor = 1.3
 behaviorLib.healAtWellProximityFactor = 0.5

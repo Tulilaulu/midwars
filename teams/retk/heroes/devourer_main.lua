@@ -95,9 +95,9 @@ function object:SkillBuild()
   end
 end
 
-behaviorLib.StartingItems = {"Item_MerricksBounty", "Item_LoggersHatchet", "2 Item_RunesOfTheBlight"}
+behaviorLib.StartingItems = {"Item_MerricksBounty", "Item_LoggersHatchet", "Item_ManaBattery"}
 behaviorLib.LaneItems = {"Item_Marchers", "Item_Steamboots", "Item_MysticVestments"}
-behaviorLib.MidItems = {"Item_PortalKey", "Item_Excruciator", "Item_HealthMana2", "Item_MagicArmor2"}
+behaviorLib.MidItems = {"Item_PortalKey", "Item_Excruciator", "Item_HealthMana2", "Item_MagicArmor2", "Item_AxeOfTheMalphai"} -- Items: PK, Barbed, Icon, Shamans, Malphai for behe heart
 behaviorLib.LateItems = {"Item_BehemothsHeart", "Item_BarrierIdol", "Item_BehemothsHeart"}
 
 behaviorLib.healAtWellHealthFactor = 1.3

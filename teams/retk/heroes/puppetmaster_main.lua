@@ -76,13 +76,13 @@ behaviorLib.debugHarassExecute = false
 core.tLanePreferences = {Jungle = 0, Mid = 5, ShortSolo = 4, LongSolo = 0, ShortSupport = 0, LongSupport = 0, ShortCarry = 4, LongCarry = 3}
 
 behaviorLib.StartingItems =
-	{"Item_MerricksBounty", "2 Item_MinorTotem", "Item_ManaBattery", "Item_MarkOfTheNovice" }
+	{"Item_MerricksBounty", "2 Item_MinorTotem", "Item_ManaBattery", "Item_MarkOfTheNovice" } -- Items: Merrick's Bounty, etc
 behaviorLib.LaneItems =
-	{ "Item_PowerSupply", "Item_Marchers", "Item_PretendersCrown", "Item_Intelligence5", "Item_GraveLocket", "Item_ApprenticesRobe", "Item_Steamboots"}
+	{ "Item_PowerSupply", "Item_Marchers", "Item_PretendersCrown", "Item_Intelligence5", "Item_GraveLocket", "Item_ApprenticesRobe", "Item_Steamboots"} -- Items: Power supply, boots, Gravelocket
 behaviorLib.MidItems =
-	{"Item_Shield2", "Item_WhisperingHelm", "Item_Glowstone", "Item_Beastheart", "Item_HealthMana2",  "Item_AcolytesStaff", "Item_LuminousPrism", "Item_Morph" } -- Items: Shaman's Headress, Daemonic Breastplate, Icebrand
+	{"Item_HelmOfTheVictim", "Item_WhisperingHelm", "Item_Glowstone", "Item_Beastheart", "Item_HealthMana2",  "Item_AcolytesStaff", "Item_LuminousPrism", "Item_Morph" } -- Items: Whispering Helm, Icon, sheepstick
 behaviorLib.LateItems =
-	{"Item_BehemothsHeart"} -- Items: Behemoth's Heart, Upg Icebrang into Frostwolf Skull
+	{"Item_Beastheart", "Item_BehemothsHeart"} -- Items: Behemoth's Heart from parts
 
 behaviorLib.healAtWellHealthFactor = 1.3
 behaviorLib.healAtWellProximityFactor = 0.5

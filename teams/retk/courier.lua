@@ -74,18 +74,18 @@ function object:IsPoolDiving()
 end
 
 local function TowerDenyUtility(botBrain)
-  	for _, tower in pairs(core.localUnits["AllyTowers"]) do
-		if tower:GetHealthPercent() < 0.005 then
-			return 100
-		end	
-		if tower:GetHealthPercent() < 0.01 then
-			return 85
-		end
-		if tower:GetHealthPercent() < 0.03 then
-			return 65
-		end
-	end
-	return 0
+    for _, tower in pairs(core.localUnits["AllyTowers"]) do
+        if tower:GetHealthPercent() < 0.005 then
+            return 100
+        end
+        if tower:GetHealthPercent() < 0.01 then
+            return 85
+        end
+        if tower:GetHealthPercent() < 0.03 then
+            return 65
+        end
+    end
+    return 0
 end
 
 function TowerDeny()

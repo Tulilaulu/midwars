@@ -70,9 +70,10 @@ behaviorLib.StartingItems =
 behaviorLib.LaneItems =
 	{ "Item_PowerSupply", "Item_Marchers", "Item_Punchdagger", "Item_EnhancedMarchers"} -- Items: power supply, ghost marchers
 behaviorLib.MidItems =
-	{ "Item_Ringmail", "Item_SolsBulwark", "Item_Glowstone", "Item_Beastheart", "Item_HealthMana2" } -- Items: bulwark, Icon
+	{ "Item_Ringmail", "Item_SolsBulwark", "Item_SnakeBracelet" } -- Items: bulwark, snake bracelet for wingbow
+--	{ "Item_Ringmail", "Item_SolsBulwark", "Item_Glowstone", "Item_Beastheart", "Item_HealthMana2" } -- Items: bulwark, Icon
 behaviorLib.LateItems =
-	{ "Item_Platemail", "Item_DaemonicBreastplate", "Item_Glowstone", "Item_Protect", "Item_Warhammer", "Item_Pierce", "Item_Voulge", "Item_Weapon3"} -- Items: daemonic, nullstone, shieldbreaker, savage mace
+	{ "Item_Platemail", "Item_Warpcleft", "Item_DaemonicBreastplate", "Item_Steamstaff", "Item_Evasion", "Item_Warhammer", "Item_Pierce 3", "Item_Voulge", "Item_Weapon3"} -- Items: daemonic, wingbow, shieldbreaker, savage mace
 
 behaviorLib.healAtWellHealthFactor = 1.3
 behaviorLib.healAtWellProximityFactor = 0.5

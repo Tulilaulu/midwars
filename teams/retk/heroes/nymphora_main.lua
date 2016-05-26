@@ -72,7 +72,7 @@ behaviorLib.LaneItems =
 behaviorLib.MidItems =
 	{"Item_Astrolabe", "Item_Beastheart", "Item_Glowstone", "Item_HealthMana2", "Item_AcolytesStaff", "Item_Morph"}
 behaviorLib.LateItems =
-	{"Item_Summon", "Item_BehemothsHeart"} --Intelligence7 is Staff of the Master
+	{"Item_Summon", "Item_AxeOfTheMalphai", "Item_BehemothsHeart"} --Intelligence7 is Staff of the Master
 
 
 -- Thresholds --

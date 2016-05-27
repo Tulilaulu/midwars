@@ -905,8 +905,8 @@ end
 
 ---- Group-and-push logic ----
 --Note: all times in match time
-object.nPushIntervalMin = core.MinToMS(0.05)
-object.nPushIntervalMax = core.MinToMS(0.05)
+object.nPushIntervalMin = core.MinToMS(0.02)
+object.nPushIntervalMax = core.MinToMS(0.02)
 
 -- Time until the first push
 -- object.nNextPushTime = core.MinToMS(7) + core.RandomReal(0, object.nPushIntervalMax - object.nPushIntervalMin) 
@@ -917,10 +917,10 @@ object.unitPushTarget = nil
 object.unitRallyPosition = nil
 
 object.tArrivalEstimatePairs = {}
-object.nGroupUpRadius = 1100
+object.nGroupUpRadius = 800
 object.nGroupUpRadiusSq = object.nGroupUpRadius * object.nGroupUpRadius
 object.nGroupEstimateMul = 1.5
-object.nMaxGroupWaitTime = core.SToMS(3)
+object.nMaxGroupWaitTime = core.SToMS(1)
 object.nGroupWaitTime = nil
 
 function object:GroupAndPushLogic()

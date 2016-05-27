@@ -86,7 +86,7 @@ function object:ClusterHeroes()
             local newCenter = core.FindCenterOfMass(newCluster)
             local ok = true
             for _, other in pairs(newCluster) do
-                if Vector3.Distance2D(newCenter, other:GetPosition()) > 1000 then
+                if Vector3.Distance2D(newCenter, other:GetPosition()) > 800 then
                     ok = false
                     break
                 end

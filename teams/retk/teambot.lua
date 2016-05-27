@@ -36,7 +36,7 @@ local function InEnemyTerritory(pos)
     else
         local ny = legionLineA.y + legionK * (pos.x - legionLineA.x)
         ret = pos.y < ny
-        drawLine(pos, Vector3.Create(pos.x, ny), 'white')
+        -- drawLine(pos, Vector3.Create(pos.x, ny), 'white')
     end
     return ret
 end

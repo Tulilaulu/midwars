@@ -120,8 +120,8 @@ end
 function object:onthinkOverride(tGameVariables)
     self:onthinkOld(tGameVariables)
 
-    drawLine(legionLineA, legionLineB)
-    drawLine(hellbourneLineA, hellbourneLineB)
+    -- drawLine(legionLineA, legionLineB)
+    -- drawLine(hellbourneLineA, hellbourneLineB)
     local cluster, center = object:ClusterHeroes()
     local nearEnemies = false
     if InEnemyTerritory(center) then
@@ -133,7 +133,7 @@ function object:onthinkOverride(tGameVariables)
     local ownLevelSum = 0
     local ownCount = 0
     for _, unit in pairs(cluster) do
-        drawLine(center, unit:GetPosition(), 'green')
+        -- drawLine(center, unit:GetPosition(), 'green')
         ownLevelSum = ownLevelSum + unit:GetLevel()
         ownCount = ownCount + 1
     end

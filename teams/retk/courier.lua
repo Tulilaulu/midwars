@@ -36,7 +36,7 @@ local function CourierUtility(botBrain)
     local bugged = false
     if courierFound > 0 and HoN:GetMatchTime() - courierFound > 40000 then
         bugged = true
-        core.AllChat("Courier is bugged :(")
+        -- core.AllChat("Courier is bugged :(")
     end
 
 
@@ -122,7 +122,7 @@ tinsert(behaviorLib.tBehaviors, TowerDenyBehavior)
 
 function object:CheckMerricks()
     local merricks = core.GetItem("Item_MerricksBounty")
-    if merricks == nil then
+    if merricks == nil or true then
         return
     end
     local lastCharges = object.lastMerricksCharges

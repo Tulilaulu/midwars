@@ -3639,7 +3639,7 @@ Current algorithm:
                     else
                         msg = msg .. "... and I can't move it from stash :("
                     end
-                    core.AllChat(msg)
+                    -- core.AllChat(msg)
                     return
                 end
             end

@@ -436,14 +436,6 @@ end
 object.preGameExecuteOld = behaviorLib.PreGameBehavior["Execute"]
 behaviorLib.PreGameBehavior["Execute"] = PreGameExecuteOverride
 
-local function DefensiveUltiUtility(botBrain)
-    local hpPercent = core.unitSelf:GetHealthPercent()
-    if skills.ulti:CanActivate() and hpPercent < 0.35 then
-        return 95
-    end
-    return 0
-end
-
 function behaviorLib.CustomReturnToWellExecute(botBrain)
     if not skills.leap:CanActivate() then
         return false
@@ -462,6 +454,82 @@ function behaviorLib.CustomReturnToWellExecute(botBrain)
     end
 
     return core.OrderAbility(botBrain, skills.leap)
+end
+
+local function GetRangeToClosestEnemy(ally)
+    local dist = 999999999
+    for _, enemy in pairs(core.teamBotBrain.tEnemyHeroes) do
+        if enemy:IsValid() and enemy:IsAlive() and core.CanSeeUnit(object, enemy) then
+            local nd = Vector3.Distance2D(enemy:GetPosition(), ally:GetPosition())
+            if nd < dist then
+                dist = nd
+            end
+        end
+    end
+    return dist
+end
+
+local function EnergizerUtility(botBrain)
+    local item = core.GetItem("Item_Energizer")
+
+    local use = false
+    for _, ally in pairs(core.teamBotBrain.tAllyHeroes) do
+        if not ally:IsAlive() or Vector3.Distance2D(core.unitSelf:GetPosition(), ally:GetPosition()) >= 600 then
+            -- drawCross(ally:GetPosition(), 'red')
+        else
+            if ally:GetHealthPercent() < 0.4 then
+                use = true
+                -- drawCross(ally:GetPosition(), 'green')
+            elseif GetRangeToClosestEnemy(ally) < 700 and ally:GetHealthPercent() < 0.6 then
+                use = true
+                -- drawCross(ally:GetPosition(), 'yellow')
+            else
+                for _, enemy in pairs(core.teamBotBrain.tEnemyHeroes) do
+                    if enemy:IsValid() and enemy:IsAlive() and core.CanSeeUnit(object, enemy) and Vector3.Distance2D(enemy:GetPosition(), ally:GetPosition())
+ < 1200 and enemy:GetHealthPercent() < 0.5 then
+                        use = true
+                        -- drawCross(enemy:GetPosition(), 'blue')
+                        break
+                    end
+                end
+            end
+        end
+    end
+
+    if not item or not item:CanActivate() then
+        return 0
+    end
+    if use then
+        return 998
+    end
+    return 0
+end
+
+local function EnergizerExecute(botBrain)
+    local item = core.GetItem("Item_Energizer")
+    return core.OrderItemClamp(botBrain, core.unitSelf, item)
+end
+
+behaviorLib.EnergizerBehavior = {}
+behaviorLib.EnergizerBehavior["Execute"] = EnergizerExecute
+behaviorLib.EnergizerBehavior["Utility"] = EnergizerUtility
+behaviorLib.EnergizerBehavior["Name"] = "Energizer"
+tinsert(behaviorLib.tBehaviors, behaviorLib.EnergizerBehavior)
+
+local function DefensiveUltiUtility(botBrain)
+
+    local use = false
+    for _, ally in pairs(core.teamBotBrain.tAllyHeroes) do
+        if ally:IsAlive() and ally:GetHealthPercent() < 0.35 and GetRangeToClosestEnemy(ally) < 1200  then
+            -- drawCross(ally:GetPosition(), 'white')
+            use = true
+        end
+    end
+
+    if use and skills.ulti:CanActivate() then
+        return 999
+    end
+    return 0
 end
 
 local function DefensiveUltiExecute(botBrain)

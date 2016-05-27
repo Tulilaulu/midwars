@@ -400,6 +400,10 @@ object.harassExecuteOld = behaviorLib.HarassHeroBehavior["Execute"]
 behaviorLib.HarassHeroBehavior["Execute"] = HarassHeroExecuteOverride
 
 local function PreGameExecuteOverride(botBrain)
+    if core.teamBotBrain.myName ~= "RETK" then
+        core.AllChat("Wrong teambot is loaded :( Human please fix!")
+    end
+
     if arrowThrown >= 20 then
         return object.preGameExecuteOld(botBrain)
     end
